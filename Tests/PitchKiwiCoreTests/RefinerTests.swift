@@ -56,6 +56,57 @@ final class RefinerTests: XCTestCase {
         XCTAssertEqual(result.text, "Please handle things like duplicate phrases")
     }
 
+    func testStrongFillerChainAndParentheticalMarkersAreRemoved() {
+        let result = refiner.refine(
+            text: "Like, so, umm, ummm, I, uh, I want to, like, make the punctuation stronger period",
+            dictionary: [],
+            snippets: [],
+            developerMode: false,
+            mode: .dictate
+        )
+
+        XCTAssertEqual(result.text, "I want to make the punctuation stronger.")
+        XCTAssertTrue(result.changes.contains { $0.kind == .filler })
+        XCTAssertTrue(result.changes.contains { $0.kind == .repetition })
+        XCTAssertTrue(result.changes.contains { $0.kind == .punctuation })
+    }
+
+    func testMoreHesitationSpellingsAreRemoved() {
+        let result = refiner.refine(
+            text: "Ahh, uhm, erm, let me think, ship the local build",
+            dictionary: [],
+            snippets: [],
+            developerMode: false,
+            mode: .dictate
+        )
+
+        XCTAssertEqual(result.text, "Ship the local build")
+    }
+
+    func testMeaningfulLikeAndUncertaintyArePreserved() {
+        let result = refiner.refine(
+            text: "I think maybe I like Swift",
+            dictionary: [],
+            snippets: [],
+            developerMode: false,
+            mode: .dictate
+        )
+
+        XCTAssertEqual(result.text, "I think maybe I like Swift")
+    }
+
+    func testSpokenPunctuationIsSpacedAndSentenceCased() {
+        let result = refiner.refine(
+            text: "hello comma world period this is tighter question mark yes",
+            dictionary: [],
+            snippets: [],
+            developerMode: false,
+            mode: .dictate
+        )
+
+        XCTAssertEqual(result.text, "Hello, world. This is tighter? Yes")
+    }
+
     func testPromptModeStructuresOnlyPresentContent() {
         let result = refiner.refine(
             text: "I want to build a local dictation app. For context it runs on a Mac. Make sure it never sends audio to a server. Done when it inserts text into Cursor.",

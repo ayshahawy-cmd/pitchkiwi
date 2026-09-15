@@ -73,14 +73,30 @@ public struct DeterministicRefiner: TextRefining {
     }
 
     private func removeFillers(from input: String) -> String {
+        let hesitation = #"(?:u+m+|u+h+m*|e+r+m*|a+h+|h+m+|mm[ -]?hmm)"#
         var text = replace(
             input,
-            pattern: #"(?i)(?<![\p{L}\p{N}_])(um+|uh+|erm+|hmm+|mm[ -]?hmm|you know)(?![\p{L}\p{N}_])[,;:]?\s*"#,
+            pattern: "(?i)(?<![\\p{L}\\p{N}_])(?:\(hesitation)|you know|i mean|let me (?:see|think))(?![\\p{L}\\p{N}_])[,;:…-]?\\s*",
             with: ""
         )
-        // These words are removed only as a leading warm-up cluster. “Like”
-        // elsewhere remains untouched because it may express comparison.
-        text = replace(text, pattern: #"(?i)^(?:(?:yeah|okay|ok|so|like)\b[, ]*)+"#, with: "")
+
+        // Remove discourse markers only where punctuation or clause position
+        // makes their filler role clear. Preserve semantic uses such as
+        // “I like Swift” and uncertainty such as “I think” or “maybe”.
+        text = replace(text, pattern: #"(?i),\s*(?:like|so)\s*[,;:]\s*"#, with: " ")
+        text = replace(
+            text,
+            pattern: #"(?i)(^|[.!?]\s+)(?:(?:yeah|okay|ok|so|like)\b[\s,;:-]*)+"#,
+            with: "$1"
+        )
+
+        // Whisper sometimes emits a whole warm-up as one comma-free run.
+        // Re-run hesitation cleanup after deleting the surrounding markers.
+        text = replace(
+            text,
+            pattern: "(?i)(?<![\\p{L}\\p{N}_])(?:\(hesitation))(?![\\p{L}\\p{N}_])[,;:…-]?\\s*",
+            with: ""
+        )
         return text
     }
 
@@ -240,16 +256,33 @@ public struct DeterministicRefiner: TextRefining {
             text = replace(text, pattern: pattern, with: replacement)
         }
         text = replace(text, pattern: #"[ \t]+([,;:?!]|\.(?![\p{L}\p{N}]))"#, with: "$1")
+        text = replace(text, pattern: #"([,;:])(?:\s*\1)+"#, with: "$1")
+        text = replace(text, pattern: #"([!?])(?:\s*\1)+"#, with: "$1")
         // Only separate punctuation that follows a word. A leading dot in a
         // developer token such as `.env` must remain attached.
         text = replace(text, pattern: #"(?<=[\p{L}\p{N}])([,.;:?!])(?=[\p{L}\p{N}])"#, with: "$1 ")
         text = replace(text, pattern: #"[ \t]{2,}"#, with: " ")
         text = replace(text, pattern: #"\n[ \t]+"#, with: "\n")
+        text = replace(text, pattern: #"\n{3,}"#, with: "\n\n")
 
         if let first = text.first, first.isLetter, first.isLowercase {
             text.replaceSubrange(text.startIndex...text.startIndex, with: String(first).uppercased())
         }
+        text = capitalizeSentenceStarts(in: text)
         return text.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private func capitalizeSentenceStarts(in input: String) -> String {
+        guard let regex = try? NSRegularExpression(pattern: #"(?:[.!?][ \t]+|\n+)(\p{Ll})"#) else {
+            return input
+        }
+        var text = input
+        let matches = regex.matches(in: text, range: NSRange(text.startIndex..., in: text))
+        for match in matches.reversed() {
+            guard let range = Range(match.range(at: 1), in: text) else { continue }
+            text.replaceSubrange(range, with: text[range].uppercased())
+        }
+        return text
     }
 
     private func replace(_ input: String, pattern: String, with replacement: String) -> String {

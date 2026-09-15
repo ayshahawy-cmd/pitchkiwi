@@ -11,8 +11,8 @@ Speech cleanup must make dictated text easier to use without changing what the s
 Pure Swift transformations handle predictable operations:
 
 - whitespace, punctuation, and paragraph breaks;
-- immediately repeated words/phrases;
-- conservative filler removal;
+- immediately repeated words/phrases, including comma-separated false starts;
+- strong hesitation removal for forms such as `um`, `umm`, `uhm`, `erm`, and clearly parenthetical discourse markers;
 - dictionary corrections and casing;
 - snippet expansion;
 - spoken developer symbols and formatting commands;
