@@ -21,3 +21,5 @@ All notable changes will be documented here. This project follows Keep a Changel
 - Replaced the recording HUD with a compact 168×42 live microphone-level waveform.
 - Added permission-first onboarding and stale-focus recovery for reliable browser and Electron text insertion.
 - Hardened the clipboard fallback with delayed event delivery and cancellation-safe restoration.
+- Added a one-time four-step onboarding experience for privacy, Fn controls, permissions, and first use.
+- Added original repository artwork, public setup documentation, and reproducible release archive packaging.

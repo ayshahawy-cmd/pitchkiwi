@@ -28,7 +28,9 @@ private enum Destination: String, CaseIterable, Identifiable {
 
 struct MainView: View {
     @ObservedObject var model: AppModel
+    @AppStorage("onboardingCompletedV1") private var onboardingCompleted = false
     @State private var selection: Destination? = .home
+    @State private var showOnboarding = false
 
     var body: some View {
         NavigationSplitView {
@@ -72,7 +74,285 @@ struct MainView: View {
             }
         }
         .tint(Color(red: 0.48, green: 0.68, blue: 0.10))
+        .task {
+            if !onboardingCompleted {
+                showOnboarding = true
+            }
+        }
+        .sheet(isPresented: $showOnboarding) {
+            OnboardingView(model: model) {
+                onboardingCompleted = true
+                showOnboarding = false
+            }
+            .interactiveDismissDisabled()
+        }
     }
+}
+
+private struct OnboardingView: View {
+    @ObservedObject var model: AppModel
+    let onComplete: () -> Void
+    @State private var step = 0
+
+    private let steps = 4
+
+    var body: some View {
+        ZStack {
+            VibeBackdrop()
+
+            VStack(spacing: 0) {
+                HStack {
+                    BrandHeader()
+                        .frame(width: 180)
+                    Spacer()
+                    HStack(spacing: 7) {
+                        ForEach(0..<steps, id: \.self) { index in
+                            Capsule(style: .continuous)
+                                .fill(index == step ? VibePalette.accent : Color.primary.opacity(0.12))
+                                .frame(width: index == step ? 26 : 8, height: 8)
+                                .animation(.snappy(duration: 0.24), value: step)
+                        }
+                    }
+                }
+                .padding(.horizontal, 30)
+                .padding(.top, 26)
+
+                Group {
+                    switch step {
+                    case 0: welcomeStep
+                    case 1: controlsStep
+                    case 2: permissionsStep
+                    default: readyStep
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .contentShape(Rectangle())
+
+                HStack {
+                    if step > 0 {
+                        Button("Back") {
+                            withAnimation(.snappy) { step -= 1 }
+                        }
+                        .buttonStyle(.bordered)
+                    }
+
+                    Spacer()
+
+                    Button(step == steps - 1 ? "Start using VibeFlow" : "Continue") {
+                        if step == steps - 1 {
+                            onComplete()
+                        } else {
+                            withAnimation(.snappy) { step += 1 }
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.large)
+                    .keyboardShortcut(.defaultAction)
+                }
+                .padding(30)
+            }
+        }
+        .frame(width: 760, height: 540)
+        .tint(VibePalette.accent)
+    }
+
+    private var welcomeStep: some View {
+        OnboardingPage(
+            icon: "waveform",
+            eyebrow: "WELCOME TO VIBEFLOW",
+            title: "Your voice stays yours.",
+            message: "Speak directly into editors, terminals, browsers, and AI chats. Audio is processed by Whisper on this Mac, discarded after transcription, and never uploaded."
+        ) {
+            HStack(spacing: 12) {
+                PromisePill(icon: "lock.fill", text: "No account")
+                PromisePill(icon: "icloud.slash.fill", text: "No cloud")
+                PromisePill(icon: "waveform.badge.minus", text: "No saved audio")
+            }
+        }
+    }
+
+    private var controlsStep: some View {
+        OnboardingPage(
+            icon: "keyboard",
+            eyebrow: "ONE KEY, TWO MODES",
+            title: "Hold, speak, release.",
+            message: "Use the Fn/Globe key from any normal text field. VibeFlow places the finished transcript at the cursor without pressing Return or submitting anything."
+        ) {
+            HStack(spacing: 14) {
+                GestureCard(keys: ["fn"], title: "Push to talk", detail: "Hold while speaking · release to insert")
+                GestureCard(keys: ["fn", "fn"], title: "Hands-free", detail: "Double-press · press once to stop")
+            }
+        }
+    }
+
+    private var permissionsStep: some View {
+        OnboardingPage(
+            icon: "hand.raised.fill",
+            eyebrow: "MAC PERMISSIONS",
+            title: "Two permissions. Nothing more.",
+            message: "Microphone lets VibeFlow hear you. Accessibility lets it detect Fn and insert text into the app you were already using."
+        ) {
+            VStack(spacing: 10) {
+                PermissionRow(
+                    icon: "mic.fill",
+                    title: "Microphone",
+                    detail: "Capture speech in memory",
+                    isGranted: model.microphoneAuthorized,
+                    buttonTitle: "Allow microphone",
+                    action: model.requestMicrophone
+                )
+                PermissionRow(
+                    icon: "cursorarrow.click.2",
+                    title: "Accessibility",
+                    detail: "Use Fn and insert at the cursor",
+                    isGranted: model.accessibilityAuthorized,
+                    buttonTitle: "Open Settings",
+                    action: model.requestAccessibility
+                )
+            }
+            .frame(maxWidth: 560)
+        }
+    }
+
+    private var readyStep: some View {
+        OnboardingPage(
+            icon: "checkmark",
+            eyebrow: "YOU'RE READY",
+            title: "Try your first prompt.",
+            message: "Open your coding tool or AI chat, click into its text box, hold Fn, and say the prompt below. Release Fn and VibeFlow will insert it for you."
+        ) {
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Try saying")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                Text("“Build a small Swift function that validates an email address.”")
+                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                Label("The first transcription may be slower while the local model warms up.", systemImage: "bolt.fill")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            .padding(18)
+            .frame(maxWidth: 560)
+            .vibeGlass(cornerRadius: 16)
+        }
+    }
+}
+
+private struct OnboardingPage<Content: View>: View {
+    let icon: String
+    let eyebrow: String
+    let title: String
+    let message: String
+    @ViewBuilder let content: () -> Content
+
+    var body: some View {
+        VStack(spacing: 20) {
+            ZStack {
+                Circle()
+                    .fill(VibePalette.accent.opacity(0.18))
+                    .frame(width: 86, height: 86)
+                Circle()
+                    .stroke(VibePalette.accent.opacity(0.32), lineWidth: 1)
+                    .frame(width: 86, height: 86)
+                Image(systemName: icon)
+                    .font(.system(size: 34, weight: .semibold))
+                    .foregroundStyle(VibePalette.accent)
+            }
+
+            VStack(spacing: 8) {
+                Text(eyebrow)
+                    .font(.system(size: 10, weight: .bold, design: .monospaced))
+                    .tracking(1.5)
+                    .foregroundStyle(VibePalette.accent)
+                Text(title)
+                    .font(.system(size: 34, weight: .semibold, design: .rounded))
+                Text(message)
+                    .font(.body)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(3)
+                    .frame(maxWidth: 580)
+            }
+
+            content()
+        }
+        .padding(.horizontal, 44)
+    }
+}
+
+private struct PromisePill: View {
+    let icon: String
+    let text: String
+
+    var body: some View {
+        Label(text, systemImage: icon)
+            .font(.callout.weight(.medium))
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .vibeGlass(cornerRadius: 999)
+    }
+}
+
+private struct GestureCard: View {
+    let keys: [String]
+    let title: String
+    let detail: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 5) {
+                ForEach(Array(keys.enumerated()), id: \.offset) { _, key in
+                    Text(key)
+                        .font(.system(size: 14, weight: .bold, design: .monospaced))
+                        .frame(width: 38, height: 30)
+                        .background(.primary.opacity(0.08), in: RoundedRectangle(cornerRadius: 7))
+                }
+            }
+            Text(title).font(.headline)
+            Text(detail).font(.caption).foregroundStyle(.secondary)
+        }
+        .padding(16)
+        .frame(width: 265, alignment: .leading)
+        .vibeGlass(cornerRadius: 16)
+    }
+}
+
+private struct PermissionRow: View {
+    let icon: String
+    let title: String
+    let detail: String
+    let isGranted: Bool
+    let buttonTitle: String
+    let action: () -> Void
+
+    var body: some View {
+        HStack(spacing: 14) {
+            Image(systemName: icon)
+                .font(.title3)
+                .foregroundStyle(VibePalette.accent)
+                .frame(width: 28)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title).font(.headline)
+                Text(detail).font(.caption).foregroundStyle(.secondary)
+            }
+            Spacer()
+            if isGranted {
+                Label("Allowed", systemImage: "checkmark.circle.fill")
+                    .font(.callout.weight(.semibold))
+                    .foregroundStyle(.green)
+            } else {
+                Button(buttonTitle, action: action)
+                    .buttonStyle(.bordered)
+            }
+        }
+        .padding(14)
+        .vibeGlass(cornerRadius: 14)
+    }
+}
+
+private enum VibePalette {
+    static let accent = Color(red: 0.48, green: 0.68, blue: 0.10)
 }
 
 private struct BrandHeader: View {

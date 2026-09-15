@@ -1,29 +1,55 @@
-# VibeFlow
+<p align="center">
+  <img src="docs/assets/readme-hero.svg" alt="VibeFlow — private voice-to-text for developers on macOS" width="100%">
+</p>
 
-> A private, local-first voice-to-text app for developers on macOS.
+<p align="center">
+  <img alt="macOS 14 or newer" src="https://img.shields.io/badge/macOS-14%2B-111111?style=flat-square&amp;logo=apple&amp;logoColor=white">
+  <img alt="Swift 6" src="https://img.shields.io/badge/Swift-6-F05138?style=flat-square&amp;logo=swift&amp;logoColor=white">
+  <img alt="Local first" src="https://img.shields.io/badge/inference-local-9BCB38?style=flat-square">
+  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-6E7A68?style=flat-square"></a>
+</p>
 
-VibeFlow lets you hold the **Fn/Globe key**, speak, and release to insert polished text into the app you were using. Double-press Fn to dictate hands-free, then press it once more to stop. Microphone audio stays in memory, transcription runs through `whisper.cpp` on your Mac, and no account or server is involved.
+<p align="center">
+  Hold <strong>Fn</strong> → speak → release. Your words appear at the cursor.<br>
+  No account. No cloud transcription. No saved audio.
+</p>
 
-This is an original open-source implementation inspired by the fluid interaction model of modern dictation tools. It does not use Wispr Flow source code, private APIs, branding, copy, or visual assets.
+VibeFlow is a native, open-source macOS dictation app made for developers, vibe coders, and people who think in long prompts. It runs Whisper locally, cleans up developer language, and inserts the result into the editor, terminal, browser, or AI chat you were already using.
 
-## What works today
+> [!NOTE]
+> VibeFlow is an original project inspired by the interaction pattern of modern dictation tools. It does not contain Wispr Flow source code, private APIs, branding, copy, or visual assets.
 
-- Native SwiftUI/AppKit app and menu-bar control—no Electron.
-- Global Fn-key push-to-talk and double-press hands-free mode with a compact floating HUD.
-- In-memory microphone capture; raw audio is never written to disk.
-- Local Whisper transcription with Metal acceleration.
-- Accessibility-first insertion into editors, terminals, browsers, and chat fields.
-- Clipboard fallback that restores the previous clipboard when possible.
-- Conservative cleanup for filler, repetition, punctuation, and casing.
-- Developer speech such as `dot env`, `dash dash force`, casing commands, and Markdown punctuation.
-- Personal dictionary and exact-match voice snippets.
-- Scratchpad, local usage metrics, and configurable transcript retention.
-- History off and nearby-context reading off by default.
-- Secure-field refusal and a hard rule against synthesizing Return/Enter.
+## Why VibeFlow
 
-## Quick start
+| | VibeFlow behavior |
+| --- | --- |
+| **Fast capture** | Hold Fn for push-to-talk, or double-press Fn for hands-free dictation. |
+| **Developer aware** | Handles terms, casing commands, Markdown punctuation, snippets, and a personal dictionary. |
+| **Local by design** | Whisper inference and deterministic cleanup happen on your Mac. |
+| **Safe insertion** | Inserts text without pressing Return, submitting forms, or executing terminal commands. |
+| **Private defaults** | Audio is never saved; transcript history and nearby-context reading start off. |
+| **Native feel** | SwiftUI, AppKit, a tiny live waveform HUD, and Liquid Glass on supported macOS versions. |
 
-Requirements: macOS 14 or newer, Xcode command-line tools, and an Apple Silicon Mac.
+## Download and install
+
+### From GitHub Releases
+
+1. Open the repository's [latest release](../../releases/latest).
+2. Download `VibeFlow-macOS.zip` and unzip it.
+3. Move `VibeFlow.app` into your **Applications** folder.
+4. On the first launch, right-click VibeFlow and choose **Open**.
+5. Follow the four-screen onboarding guide to grant Microphone and Accessibility access.
+
+Pre-1.0 community builds are ad-hoc signed. macOS may say it cannot verify the developer; right-clicking and choosing **Open** uses Apple's normal one-app approval flow. Do not disable Gatekeeper. A future public release should use Developer ID signing and notarization.
+
+### Build it yourself
+
+Requirements:
+
+- macOS 14 or newer
+- Apple Silicon Mac
+- Xcode 16 or newer, or matching Command Line Tools
+- About 500 MB free for the framework, model, and build output
 
 ```bash
 git clone <your-repository-url>
@@ -34,94 +60,150 @@ swift test
 open ".build/VibeFlow.app"
 ```
 
-The bootstrap script downloads a checksum-pinned official `whisper.cpp` XCFramework and the `ggml-base.en` model. They are kept in ignored local directories and copied into the final app bundle. The build script produces an ad-hoc-signed app at `.build/VibeFlow.app`.
+The bootstrap script downloads checksum-pinned `whisper.cpp` artifacts and the `ggml-base.en` model. The model and generated app stay in ignored local directories and are not committed to Git.
 
-On first use, macOS will ask for:
+## How to use it
 
-1. **Microphone** — required to hear push-to-talk dictation.
-2. **Accessibility** — required for the global shortcut and inserting text into other apps.
+### Push to talk
 
-Cross-app dictation waits until Accessibility is granted so VibeFlow never records something it already knows it cannot insert. Click **Enable cross-app insertion**, enable VibeFlow in System Settings, then return to the app you want to type into. Locally ad-hoc-signed development builds may need permission again after rebuilding; a future Developer ID release keeps a stable signing identity.
+1. Click a normal text field in any app.
+2. Hold the **Fn/Globe** key.
+3. Speak while the small waveform moves with your voice.
+4. Release Fn. VibeFlow transcribes, cleans up, and inserts the text.
 
-## Use it
+### Hands-free
 
-1. Put the cursor in any normal text field.
-2. Hold the **Fn/Globe key**. For hands-free dictation, double-press Fn.
-3. Speak naturally.
-4. Release Fn to finish, or press Fn once to finish hands-free dictation.
+1. Double-press **Fn**.
+2. Speak without holding the key.
+3. Press **Fn** once more to stop and insert.
 
-VibeFlow inserts text but never submits a form or executes a terminal command. Press **Escape** while listening to cancel. The first transcription can be slower while Metal compiles its local kernels; later runs are faster.
+Press **Escape** while listening to cancel. VibeFlow never synthesizes Return/Enter, so dictated terminal commands and prompts are inserted but not executed or submitted.
 
-If macOS also opens Emoji & Symbols, changes input source, or starts Apple Dictation when you press Fn, open **System Settings → Keyboard** and set the Fn/Globe-key action to **Do Nothing**. VibeFlow still receives the key through Accessibility while it is running.
+> [!TIP]
+> If Fn opens Emoji & Symbols, changes your input source, or starts Apple Dictation, go to **System Settings → Keyboard** and set the Fn/Globe-key action to **Do Nothing**. VibeFlow can still observe Fn while Accessibility access is enabled.
 
-## Privacy model
+The first transcription after launch may be slower while the model loads and Metal initializes. The current version performs transcription after you stop speaking; streaming partial results are on the roadmap.
 
-The default workflow has no network path:
+## First-launch onboarding
+
+The onboarding guide appears once and explains:
+
+1. what stays on the Mac;
+2. hold-to-talk and hands-free Fn gestures;
+3. why Microphone and Accessibility permissions are required;
+4. how to try a first prompt safely.
+
+Completion is stored as one local macOS preference. It is not synced or sent anywhere.
+
+## Permissions
+
+| Permission | Why it is needed | What it does **not** enable |
+| --- | --- | --- |
+| **Microphone** | Captures speech only during visible dictation. | No wake word, background listening, or saved recordings. |
+| **Accessibility** | Observes the Fn gesture and inserts text at the focused cursor. | Nearby-text context remains separately disabled by default. |
+
+VibeFlow will not begin cross-app dictation if Accessibility access is missing. If insertion fails, the transcript remains available inside the app for copying.
+
+## Local storage and privacy
+
+The default dictation path has no server:
 
 ```text
-Microphone → memory-only PCM → local Whisper → local cleanup → focused text field
+Microphone
+   ↓  memory-only audio
+Local Whisper model
+   ↓  raw transcript in memory
+Deterministic local cleanup
+   ↓
+Focused text field
 ```
 
-- The application binary contains no analytics, account, sync, transcription API, or cloud rewrite integration.
-- Raw audio is discarded after transcription or cancellation.
-- Transcript history defaults to **Never**.
-- Dictionary, snippets, settings, and aggregate counters live in `~/Library/Application Support/VibeFlow/vibeflow.json` with owner-only permissions.
-- Importing a model copies only the model selected by the user.
-- Network access is used by the developer bootstrap script only to fetch pinned build dependencies.
+| Data | Default | Location / lifetime |
+| --- | --- | --- |
+| Microphone audio | Never saved | Memory only; discarded after transcription or cancellation |
+| Last transcript | Memory only | Cleared when the app quits or a new result replaces it |
+| Transcript history | Off | Optional, user-selected retention in the local JSON file |
+| Dictionary and snippets | Local | `~/Library/Application Support/VibeFlow/vibeflow.json` |
+| Usage counters | Local | Content-free totals in the same JSON file |
+| Whisper model | Local | Bundled in the app or imported under VibeFlow Application Support |
+| Onboarding completion | Local | macOS application preferences |
 
-See [Security](docs/SECURITY.md) for the threat model and [SECURITY.md](SECURITY.md) for vulnerability reporting.
+The JSON data file is written atomically with owner-only permissions. The app contains no account, analytics, advertising, cloud transcription, or sync integration. During the guarded paste fallback, other clipboard utilities may briefly observe the transcript; VibeFlow restores the previous clipboard when it can.
+
+Read the full [security and privacy design](docs/SECURITY.md) and the repository [vulnerability reporting policy](SECURITY.md). Public source code makes the implementation auditable, but it is not itself a security guarantee—review releases, checksums, permissions, and code changes before trusting sensitive dictation.
+
+## Tech stack
+
+| Layer | Technology |
+| --- | --- |
+| Application | Swift 6, SwiftUI, focused AppKit bridges |
+| Audio | AVFoundation / `AVAudioEngine`, 16 kHz mono PCM |
+| Speech recognition | `whisper.cpp`, local GGML model, Metal acceleration |
+| Cleanup | Deterministic Swift pipeline; no cloud LLM required |
+| Global controls | AppKit event monitoring with Fn gesture state machine |
+| Text insertion | macOS Accessibility APIs with guarded clipboard fallback |
+| Persistence | Codable JSON, atomic writes, file mode `0600` |
+| Packaging | Swift Package Manager and reproducible shell scripts |
+| Verification | XCTest plus a real-model smoke-test executable |
 
 ## Architecture
 
-| Layer | Implementation |
-| --- | --- |
-| UI | Swift 6, SwiftUI, focused AppKit bridges |
-| Capture | AVFoundation / AVAudioEngine, converted to 16 kHz mono PCM |
-| Speech | `whisper.cpp` v1.9.4-compatible XCFramework, Metal enabled |
-| Cleanup | Deterministic Swift pipeline; no generative rewrite by default |
-| Insertion | macOS Accessibility APIs, then guarded paste fallback |
-| Storage | Codable JSON, atomic writes, file protection, mode `0600` |
-| Packaging | Swift Package Manager plus a reproducible `.app` bundle script |
-| Tests | XCTest plus a real-model smoke-test executable |
-
-The core engine is protocol-driven so capture, transcription, refinement, and insertion can be tested independently. Read [Architecture](docs/ARCHITECTURE.md), [Product spec](docs/PRODUCT_SPEC.md), [Prompt architecture](docs/PROMPT_ARCHITECTURE.md), and [Design system](docs/DESIGN_SYSTEM.md) for the full rationale.
-
-## Developer commands
-
-```bash
-make bootstrap   # download and verify local framework + default model
-make build       # debug build
-make test        # unit tests
-make app         # release build at ".build/VibeFlow.app"
+```text
+                  ┌─────────────────────────┐
+Fn / Menu Bar ──▶ │ Dictation state machine │
+                  └────────────┬────────────┘
+                               │
+        ┌──────────────────────┼──────────────────────┐
+        ▼                      ▼                      ▼
+  AVAudioEngine        whisper.cpp + Metal    Accessibility target
+        │                      │                      │
+        └──── audio ──────────▶├── text + cleanup ──▶┘
+                               │
+                               ▼
+                    Optional local history
 ```
 
-To test the actual model against an audio file:
+The core engine is protocol-driven so audio capture, transcription, refinement, and insertion can be tested independently. Deeper design documents:
+
+- [Architecture](docs/ARCHITECTURE.md)
+- [Product specification](docs/PRODUCT_SPEC.md)
+- [Prompt architecture](docs/PROMPT_ARCHITECTURE.md)
+- [Design system](docs/DESIGN_SYSTEM.md)
+- [Threat model](docs/SECURITY.md)
+
+## Developer workflow
+
+```bash
+make bootstrap   # download and verify the framework + default model
+make build       # debug build
+make test        # run unit tests
+make app         # produce .build/VibeFlow.app
+make release     # produce the app ZIP and SHA-256 checksum
+```
+
+Test the actual local model against an audio file:
 
 ```bash
 swift run vibeflow-smoke .models/ggml-base.en.bin /path/to/speech.wav
 ```
 
-The smoke executable accepts AVFoundation-readable audio and prints the locally transcribed/refined result.
+Release maintainers can run `make release`, then upload both `.build/VibeFlow-macOS.zip` and `.build/VibeFlow-macOS.zip.sha256` to a GitHub Release.
 
 ## Repository map
 
 ```text
-Sources/VibeFlowApp/      native app, screens, HUD, orchestration
+Sources/VibeFlowApp/      native app, onboarding, screens, HUD, orchestration
 Sources/VibeFlowCore/     audio, Whisper, refinement, insertion, storage
 Sources/VibeFlowSmoke/    real-model command-line smoke test
-Tests/                     state, privacy, refinement, and audio tests
-Assets/                    original project artwork
-Packaging/                 macOS bundle metadata
-scripts/                   pinned bootstrap and app packaging
-docs/                      product, architecture, security, and UX specs
+Tests/                    gesture, privacy, refinement, and state tests
+Assets/                   original application artwork
+Packaging/                macOS bundle metadata
+scripts/                  pinned bootstrap, app build, release packaging
+docs/                     product, architecture, security, and UX specs
 ```
 
-## Current scope and roadmap
+## Contributing
 
-The working MVP is English-first and targets Apple Silicon. It provides Fn push-to-talk, double-press hands-free mode, deterministic cleanup, and local JSON persistence. Planned follow-ups include user-selectable alternate hotkeys, multilingual model selection, streaming partials, richer transforms through an optional local model, encrypted export/import, release notarization, and deeper app compatibility testing.
+Issues and focused pull requests are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md), preserve the privacy and non-submission invariants, and never commit recordings, real transcripts, model weights, signing secrets, or screenshots containing personal data.
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request. Preserve [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) in redistributed builds.
-
-## Naming and license
-
-`VibeFlow` is a working project name; perform a trademark and repository-name check before publishing a release. The project is licensed under [MIT](LICENSE).
+VibeFlow is available under the [MIT License](LICENSE). The name is provisional; complete a trademark and repository-name check before a broad release.

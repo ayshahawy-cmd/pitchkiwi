@@ -15,6 +15,7 @@ final class AppModel: ObservableObject {
     @Published private(set) var handsFreeMode = false
     @Published private(set) var audioLevel: Float = 0
     @Published private(set) var accessibilityAuthorized = AccessibilityInsertionService.isAccessibilityTrusted
+    @Published private(set) var microphoneAuthorized = AVCaptureDevice.authorizationStatus(for: .audio) == .authorized
     @Published var scratchpad = ""
 
     let store = LocalStore()
@@ -44,10 +45,6 @@ final class AppModel: ObservableObject {
 
     private init() {
         modelURL = ModelManager.currentModelURL()
-    }
-
-    var microphoneAuthorized: Bool {
-        AVCaptureDevice.authorizationStatus(for: .audio) == .authorized
     }
 
     var modelReady: Bool { modelURL != nil }
@@ -123,8 +120,16 @@ final class AppModel: ObservableObject {
         beginPermissionRefresh()
     }
 
+    func requestMicrophone() {
+        Task { [weak self] in
+            _ = await AVCaptureDevice.requestAccess(for: .audio)
+            self?.microphoneAuthorized = AVCaptureDevice.authorizationStatus(for: .audio) == .authorized
+        }
+    }
+
     func refreshPermissions() {
         accessibilityAuthorized = AccessibilityInsertionService.isAccessibilityTrusted
+        microphoneAuthorized = AVCaptureDevice.authorizationStatus(for: .audio) == .authorized
     }
 
     func importModel() {
@@ -166,6 +171,7 @@ final class AppModel: ObservableObject {
             statusText = "Listening"
             insertionTarget = await inserter.captureTarget()
             try await audio.start()
+            microphoneAuthorized = true
             audioIsCapturing = true
             beginLevelMonitoring()
             if releaseRequested {
