@@ -6,6 +6,7 @@
   <img alt="macOS 14 or newer" src="https://img.shields.io/badge/macOS-14%2B-111111?style=flat-square&amp;logo=apple&amp;logoColor=white">
   <img alt="Swift 6" src="https://img.shields.io/badge/Swift-6-F05138?style=flat-square&amp;logo=swift&amp;logoColor=white">
   <img alt="Local first" src="https://img.shields.io/badge/inference-local-9BCB38?style=flat-square">
+  <a href="https://github.com/ayshahawy-cmd/vibeflow/actions/workflows/ci.yml"><img alt="CI status" src="https://github.com/ayshahawy-cmd/vibeflow/actions/workflows/ci.yml/badge.svg"></a>
   <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-6E7A68?style=flat-square"></a>
 </p>
 
@@ -34,7 +35,7 @@ VibeFlow is a native, open-source macOS dictation app made for developers, vibe 
 
 ### From GitHub Releases
 
-1. Open the repository's [latest release](../../releases/latest).
+1. Open the repository's [latest release](https://github.com/ayshahawy-cmd/vibeflow/releases/latest).
 2. Download `VibeFlow-macOS.zip` and unzip it.
 3. Move `VibeFlow.app` into your **Applications** folder.
 4. On the first launch, right-click VibeFlow and choose **Open**.
@@ -52,7 +53,7 @@ Requirements:
 - About 500 MB free for the framework, model, and build output
 
 ```bash
-git clone <your-repository-url>
+git clone https://github.com/ayshahawy-cmd/vibeflow.git
 cd vibeflow
 ./scripts/bootstrap.sh
 swift test
