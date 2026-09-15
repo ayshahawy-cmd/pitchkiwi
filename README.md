@@ -1,8 +1,8 @@
-# VibeFlow
+# Horme Flow
 
 > A private, local-first voice-to-text app for developers on macOS.
 
-VibeFlow lets you hold the **Fn/Globe key**, speak, and release to insert polished text into the app you were using. Double-press Fn to dictate hands-free, then press it once more to stop. Microphone audio stays in memory, transcription runs through `whisper.cpp` on your Mac, and no account or server is involved.
+Horme Flow lets you hold the **Fn/Globe key**, speak, and release to insert polished text into the app you were using. Double-press Fn to dictate hands-free, then press it once more to stop. Microphone audio stays in memory, transcription runs through `whisper.cpp` on your Mac, and no account or server is involved.
 
 This is an original open-source implementation inspired by the fluid interaction model of modern dictation tools. It does not use Wispr Flow source code, private APIs, branding, copy, or visual assets.
 
@@ -27,21 +27,21 @@ Requirements: macOS 14 or newer, Xcode command-line tools, and an Apple Silicon 
 
 ```bash
 git clone <your-repository-url>
-cd vibeflow
+cd horme-flow
 ./scripts/bootstrap.sh
 swift test
 ./scripts/build-app.sh
-open .build/VibeFlow.app
+open ".build/Horme Flow.app"
 ```
 
-The bootstrap script downloads a checksum-pinned official `whisper.cpp` XCFramework and the `ggml-base.en` model. They are kept in ignored local directories and copied into the final app bundle. The build script produces an ad-hoc-signed app at `.build/VibeFlow.app`.
+The bootstrap script downloads a checksum-pinned official `whisper.cpp` XCFramework and the `ggml-base.en` model. They are kept in ignored local directories and copied into the final app bundle. The build script produces an ad-hoc-signed app at `.build/Horme Flow.app`.
 
 On first use, macOS will ask for:
 
 1. **Microphone** — required to hear push-to-talk dictation.
 2. **Accessibility** — required for the global shortcut and inserting text into other apps.
 
-The app remains useful without Accessibility permission: completed text stays available to copy manually.
+Cross-app dictation waits until Accessibility is granted so Horme Flow never records something it already knows it cannot insert. Click **Enable cross-app insertion**, enable Horme Flow in System Settings, then return to the app you want to type into. Locally ad-hoc-signed development builds may need permission again after rebuilding; a future Developer ID release keeps a stable signing identity.
 
 ## Use it
 
@@ -50,9 +50,9 @@ The app remains useful without Accessibility permission: completed text stays av
 3. Speak naturally.
 4. Release Fn to finish, or press Fn once to finish hands-free dictation.
 
-VibeFlow inserts text but never submits a form or executes a terminal command. Press **Escape** while listening to cancel. The first transcription can be slower while Metal compiles its local kernels; later runs are faster.
+Horme Flow inserts text but never submits a form or executes a terminal command. Press **Escape** while listening to cancel. The first transcription can be slower while Metal compiles its local kernels; later runs are faster.
 
-If macOS also opens Emoji & Symbols, changes input source, or starts Apple Dictation when you press Fn, open **System Settings → Keyboard** and set the Fn/Globe-key action to **Do Nothing**. VibeFlow still receives the key through Accessibility while it is running.
+If macOS also opens Emoji & Symbols, changes input source, or starts Apple Dictation when you press Fn, open **System Settings → Keyboard** and set the Fn/Globe-key action to **Do Nothing**. Horme Flow still receives the key through Accessibility while it is running.
 
 ## Privacy model
 
@@ -65,7 +65,7 @@ Microphone → memory-only PCM → local Whisper → local cleanup → focused t
 - The application binary contains no analytics, account, sync, transcription API, or cloud rewrite integration.
 - Raw audio is discarded after transcription or cancellation.
 - Transcript history defaults to **Never**.
-- Dictionary, snippets, settings, and aggregate counters live in `~/Library/Application Support/VibeFlow/vibeflow.json` with owner-only permissions.
+- Dictionary, snippets, settings, and aggregate counters live in `~/Library/Application Support/Horme Flow/horme-flow.json` with owner-only permissions.
 - Importing a model copies only the model selected by the user.
 - Network access is used by the developer bootstrap script only to fetch pinned build dependencies.
 
@@ -92,13 +92,13 @@ The core engine is protocol-driven so capture, transcription, refinement, and in
 make bootstrap   # download and verify local framework + default model
 make build       # debug build
 make test        # unit tests
-make app         # release build at .build/VibeFlow.app
+make app         # release build at ".build/Horme Flow.app"
 ```
 
 To test the actual model against an audio file:
 
 ```bash
-swift run vibeflow-smoke .models/ggml-base.en.bin /path/to/speech.wav
+swift run horme-flow-smoke .models/ggml-base.en.bin /path/to/speech.wav
 ```
 
 The smoke executable accepts AVFoundation-readable audio and prints the locally transcribed/refined result.
@@ -106,9 +106,9 @@ The smoke executable accepts AVFoundation-readable audio and prints the locally 
 ## Repository map
 
 ```text
-Sources/VibeFlowApp/       native app, screens, HUD, orchestration
-Sources/VibeFlowCore/      audio, Whisper, refinement, insertion, storage
-Sources/VibeFlowSmoke/     real-model command-line smoke test
+Sources/HormeFlowApp/      native app, screens, HUD, orchestration
+Sources/HormeFlowCore/     audio, Whisper, refinement, insertion, storage
+Sources/HormeFlowSmoke/    real-model command-line smoke test
 Tests/                     state, privacy, refinement, and audio tests
 Assets/                    original project artwork
 Packaging/                 macOS bundle metadata
@@ -124,4 +124,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request. Preserve [
 
 ## Naming and license
 
-`VibeFlow` is a working project name; perform a trademark and repository-name check before publishing a release. The project is licensed under [MIT](LICENSE).
+`Horme Flow` is a working project name; perform a trademark and repository-name check before publishing a release. The project is licensed under [MIT](LICENSE).

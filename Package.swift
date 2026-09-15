@@ -3,12 +3,12 @@
 import PackageDescription
 
 let package = Package(
-    name: "VibeFlow",
+    name: "HormeFlow",
     platforms: [.macOS(.v14)],
     products: [
-        .library(name: "VibeFlowCore", targets: ["VibeFlowCore"]),
-        .executable(name: "VibeFlow", targets: ["VibeFlowApp"]),
-        .executable(name: "vibeflow-smoke", targets: ["VibeFlowSmoke"]),
+        .library(name: "HormeFlowCore", targets: ["HormeFlowCore"]),
+        .executable(name: "HormeFlow", targets: ["HormeFlowApp"]),
+        .executable(name: "horme-flow-smoke", targets: ["HormeFlowSmoke"]),
     ],
     targets: [
         .binaryTarget(
@@ -16,9 +16,9 @@ let package = Package(
             path: ".vendor/whisper.xcframework"
         ),
         .target(
-            name: "VibeFlowCore",
+            name: "HormeFlowCore",
             dependencies: ["whisper"],
-            path: "Sources/VibeFlowCore",
+            path: "Sources/HormeFlowCore",
             linkerSettings: [
                 .linkedFramework("AVFoundation"),
                 .linkedFramework("ApplicationServices"),
@@ -27,21 +27,20 @@ let package = Package(
             ]
         ),
         .executableTarget(
-            name: "VibeFlowApp",
-            dependencies: ["VibeFlowCore"],
-            path: "Sources/VibeFlowApp",
+            name: "HormeFlowApp",
+            dependencies: ["HormeFlowCore"],
+            path: "Sources/HormeFlowApp",
             resources: [.process("Resources")]
         ),
         .executableTarget(
-            name: "VibeFlowSmoke",
-            dependencies: ["VibeFlowCore"],
-            path: "Sources/VibeFlowSmoke"
+            name: "HormeFlowSmoke",
+            dependencies: ["HormeFlowCore"],
+            path: "Sources/HormeFlowSmoke"
         ),
         .testTarget(
-            name: "VibeFlowCoreTests",
-            dependencies: ["VibeFlowCore"],
-            path: "Tests/VibeFlowCoreTests"
+            name: "HormeFlowCoreTests",
+            dependencies: ["HormeFlowCore"],
+            path: "Tests/HormeFlowCoreTests"
         ),
     ]
 )
-

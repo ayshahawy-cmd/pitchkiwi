@@ -1,7 +1,7 @@
 import AppKit
 import Combine
 import SwiftUI
-import VibeFlowCore
+import HormeFlowCore
 
 @MainActor
 final class HUDPanelController {
@@ -10,7 +10,7 @@ final class HUDPanelController {
 
     init(model: AppModel) {
         panel = NSPanel(
-            contentRect: NSRect(x: 0, y: 0, width: 310, height: 68),
+            contentRect: NSRect(x: 0, y: 0, width: 168, height: 42),
             styleMask: [.borderless, .nonactivatingPanel],
             backing: .buffered,
             defer: false
@@ -48,42 +48,39 @@ final class HUDPanelController {
 
 private struct HUDView: View {
     @ObservedObject var model: AppModel
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
-        HStack(spacing: 14) {
-            ZStack {
-                Circle().fill(iconColor.opacity(0.18)).frame(width: 42, height: 42)
-                Image(systemName: iconName)
-                    .font(.system(size: 17, weight: .semibold))
-                    .foregroundStyle(iconColor)
-                    .symbolEffect(.pulse, options: reduceMotion ? .nonRepeating : .repeating, isActive: model.phase.isActive)
-            }
-
-            VStack(alignment: .leading, spacing: 3) {
-                Text(model.statusText)
-                    .font(.system(size: 14, weight: .semibold))
-                    .lineLimit(1)
-                Text(detail)
-                    .font(.system(size: 11))
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-            }
-            Spacer(minLength: 4)
+        Group {
             if model.phase == .listening {
-                Text("ESC")
-                    .font(.system(size: 10, weight: .semibold, design: .monospaced))
-                    .padding(.horizontal, 7)
-                    .padding(.vertical, 5)
-                    .background(.quaternary, in: RoundedRectangle(cornerRadius: 7))
+                HStack(spacing: 9) {
+                    Circle()
+                        .fill(Color(red: 0.72, green: 0.98, blue: 0.30))
+                        .frame(width: 6, height: 6)
+                        .shadow(color: Color(red: 0.72, green: 0.98, blue: 0.30).opacity(0.75), radius: 4)
+                    LiveWaveform(level: model.audioLevel)
+                    Spacer(minLength: 0)
+                    Image(systemName: model.handsFreeMode ? "lock.fill" : "globe")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                        .accessibilityLabel(model.handsFreeMode ? "Hands-free listening" : "Hold Fn to dictate")
+                }
+            } else {
+                HStack(spacing: 9) {
+                    Image(systemName: iconName)
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(iconColor)
+                    Text(model.statusText)
+                        .font(.system(size: 11, weight: .semibold))
+                        .lineLimit(1)
+                    Spacer(minLength: 0)
+                }
             }
         }
-        .padding(.horizontal, 14)
-        .frame(width: 310, height: 68)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).stroke(.white.opacity(0.12)))
+        .padding(.horizontal, 12)
+        .frame(width: 168, height: 42)
+        .tinyLiquidGlass()
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(model.statusText)
+        .accessibilityLabel(model.phase == .listening ? "Listening. \(detail)" : model.statusText)
     }
 
     private var iconName: String {
@@ -113,9 +110,46 @@ private struct HUDView: View {
         case .transcribing, .refining: "Nothing leaves this Mac"
         case .inserting: "Never submits or presses Return"
         case .result: model.lastTranscript.isEmpty ? "Done" : "Saved as last transcript"
-        case .error: "Open VibeFlow for recovery"
+        case .error: "Open Horme Flow for recovery"
         case .cancelling: "Discarding audio"
         case .idle: "Local and ready"
+        }
+    }
+}
+
+private struct LiveWaveform: View {
+    let level: Float
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    private let weights: [CGFloat] = [0.42, 0.72, 1, 0.58, 0.88, 0.66, 0.36]
+
+    var body: some View {
+        HStack(spacing: 3) {
+            ForEach(weights.indices, id: \.self) { index in
+                Capsule(style: .continuous)
+                    .fill(Color.primary.opacity(0.82))
+                    .frame(width: 3, height: barHeight(at: index))
+            }
+        }
+        .frame(width: 48, height: 28)
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.075), value: level)
+        .accessibilityHidden(true)
+    }
+
+    private func barHeight(at index: Int) -> CGFloat {
+        let responsiveLevel = CGFloat(max(0.06, level))
+        return 3 + (responsiveLevel * 22 * weights[index])
+    }
+}
+
+private extension View {
+    @ViewBuilder
+    func tinyLiquidGlass() -> some View {
+        if #available(macOS 26.0, *) {
+            glassEffect(.regular.tint(.black.opacity(0.08)), in: .capsule)
+        } else {
+            background(.ultraThinMaterial, in: Capsule(style: .continuous))
+                .overlay(Capsule(style: .continuous).stroke(.white.opacity(0.18)))
         }
     }
 }

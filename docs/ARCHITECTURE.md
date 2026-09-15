@@ -2,7 +2,7 @@
 
 ## 1. Decision summary
 
-VibeFlow should be a native menu-bar macOS application with a conventional settings window and a borderless floating HUD. Swift owns the orchestration and privacy boundary. `whisper.cpp` is embedded as a pinned native library for local speech recognition. Optional local rewriting is isolated behind a second engine adapter and is never part of the required transcription path.
+Horme Flow should be a native menu-bar macOS application with a conventional settings window and a borderless floating HUD. Swift owns the orchestration and privacy boundary. `whisper.cpp` is embedded as a pinned native library for local speech recognition. Optional local rewriting is isolated behind a second engine adapter and is never part of the required transcription path.
 
 Wispr Flow's exact private stack is not publicly established. This architecture reproduces useful product behavior with public macOS APIs and open-source local inference; it does not claim to duplicate Wispr's implementation.
 
@@ -42,9 +42,9 @@ The context envelope and audio buffer are job-scoped values. They must be releas
 Suggested source shape:
 
 ```text
-VibeFlow/
+HormeFlow/
 ├── App/
-│   ├── VibeFlowApp.swift
+│   ├── HormeFlowApp.swift
 │   ├── AppDelegate.swift
 │   └── AppEnvironment.swift
 ├── Core/
@@ -269,4 +269,3 @@ The model weights are not committed to Git. Release notes and the model manager 
 - Clipboard lease restores or safely yields to a newer external clipboard owner.
 - Invalid state transitions fail without side effects.
 - Every local rewrite is subjected to preservation checks before insertion.
-

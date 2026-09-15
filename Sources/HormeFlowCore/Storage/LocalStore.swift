@@ -16,7 +16,13 @@ public final class LocalStore: ObservableObject {
 
     public init(directory: URL? = nil) {
         let root = directory ?? ModelManager.appSupportDirectory()
-        fileURL = root.appendingPathComponent("vibeflow.json")
+        let newFile = root.appendingPathComponent("horme-flow.json")
+        let legacyFile = root.appendingPathComponent("vibeflow.json")
+        if !FileManager.default.fileExists(atPath: newFile.path),
+           FileManager.default.fileExists(atPath: legacyFile.path) {
+            try? FileManager.default.moveItem(at: legacyFile, to: newFile)
+        }
+        fileURL = newFile
         let decoded = Self.load(from: fileURL)
         dictionary = decoded.dictionary
         snippets = decoded.snippets

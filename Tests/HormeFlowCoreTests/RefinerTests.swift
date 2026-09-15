@@ -1,5 +1,5 @@
 import XCTest
-@testable import VibeFlowCore
+@testable import HormeFlowCore
 
 final class RefinerTests: XCTestCase {
     private let refiner = DeterministicRefiner()

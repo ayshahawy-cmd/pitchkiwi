@@ -1,14 +1,14 @@
 import AppKit
 import SwiftUI
-import VibeFlowCore
+import HormeFlowCore
 
 @main
-struct VibeFlowApp: App {
+struct HormeFlowApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var model = AppModel.shared
 
     var body: some Scene {
-        WindowGroup("VibeFlow", id: "main") {
+        WindowGroup("Horme Flow", id: "main") {
             MainView(model: model)
                 .frame(minWidth: 900, minHeight: 620)
         }
@@ -34,7 +34,7 @@ struct VibeFlowApp: App {
             MenuBarContent(model: model)
         } label: {
             Image(systemName: model.phase == .listening ? "waveform.circle.fill" : "waveform.circle")
-                .accessibilityLabel(model.phase == .listening ? "VibeFlow is listening" : "VibeFlow")
+                .accessibilityLabel(model.phase == .listening ? "Horme Flow is listening" : "Horme Flow")
         }
         .menuBarExtraStyle(.menu)
     }
@@ -49,6 +49,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let model = AppModel.shared
         hudController = HUDPanelController(model: model)
         model.shortcutMonitor.start()
+        model.refreshPermissions()
+    }
+
+    func applicationDidBecomeActive(_ notification: Notification) {
+        AppModel.shared.refreshPermissions()
     }
 
     func applicationWillTerminate(_ notification: Notification) {
@@ -68,10 +73,10 @@ private struct MenuBarContent: View {
         Divider()
         Button("Copy Last Transcript") { model.copyLastTranscript() }
             .disabled(model.lastTranscript.isEmpty)
-        Button("Open VibeFlow") { model.showMainWindow() }
+        Button("Open Horme Flow") { model.showMainWindow() }
         Divider()
         Text("Local • History \(model.store.retention == .never ? "off" : "on") • Context \(model.store.contextEnabled ? "on" : "off")")
         Divider()
-        Button("Quit VibeFlow") { NSApp.terminate(nil) }
+        Button("Quit Horme Flow") { NSApp.terminate(nil) }
     }
 }

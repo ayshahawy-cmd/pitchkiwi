@@ -2,7 +2,7 @@
 
 ## 1. Security claim
 
-VibeFlow is designed so normal dictation, cleanup, personalization, history, and Insights can run without sending data off the Mac. “Local-first” must be demonstrated by architecture and tests; it must not depend on a privacy-policy promise.
+Horme Flow is designed so normal dictation, cleanup, personalization, history, and Insights can run without sending data off the Mac. “Local-first” must be demonstrated by architecture and tests; it must not depend on a privacy-policy promise.
 
 The app still processes highly sensitive data inside the user's session. Local software can leak through logs, clipboard behavior, overly broad Accessibility access, unsafe model loading, backups, or other local applications. This document treats those as first-class risks.
 
@@ -142,10 +142,12 @@ Ask during onboarding after explaining that audio is processed locally and not r
 
 Ask only when enabling global insertion/context features. Explain separately:
 
-- insertion permission lets VibeFlow place text at the cursor;
+- insertion permission lets Horme Flow place text at the cursor;
 - context, if enabled, can read a small amount of nearby text to recognize local tokens.
 
 Accessibility permission does not automatically enable context. Revocation must stop collection/insertion immediately and preserve the result in-app.
+
+Cross-app dictation must not begin while Accessibility trust is absent. The app opens the system permission pane and refreshes status when it becomes active again, preventing successful transcription from ending in a predictably blocked insertion.
 
 ### Network
 
@@ -189,4 +191,3 @@ The project README must publish the result and environment for each release cand
 ## 9. Vulnerability handling
 
 See the repository-level `SECURITY.md`. Do not ask reporters to attach private recordings or transcripts. Provide synthetic reproduction instructions and a private contact path before public beta.
-

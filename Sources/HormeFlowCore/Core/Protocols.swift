@@ -2,6 +2,7 @@ import ApplicationServices
 import Foundation
 
 public protocol AudioCapturing: Sendable {
+    var levels: AsyncStream<Float> { get }
     func start() async throws
     func stop() async throws -> CapturedAudio
     func cancel() async

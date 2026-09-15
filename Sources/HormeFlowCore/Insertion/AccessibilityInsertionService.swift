@@ -14,6 +14,11 @@ public final class AccessibilityInsertionService: TextInserting, @unchecked Send
         _ = AXIsProcessTrustedWithOptions(options)
     }
 
+    public static func openAccessibilitySettings() {
+        guard let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") else { return }
+        NSWorkspace.shared.open(url)
+    }
+
     public func captureTarget() async -> InsertionTarget {
         guard Self.isAccessibilityTrusted else {
             return InsertionTarget(processIdentifier: NSWorkspace.shared.frontmostApplication?.processIdentifier, element: nil, isSecure: false)
@@ -40,19 +45,50 @@ public final class AccessibilityInsertionService: TextInserting, @unchecked Send
     }
 
     public func insert(_ text: String, into target: InsertionTarget) async throws {
-        guard !target.isSecure else { throw VibeFlowError.secureField }
-        guard let expectedPID = target.processIdentifier,
-              NSWorkspace.shared.frontmostApplication?.processIdentifier == expectedPID else {
-            throw VibeFlowError.insertionFailed
+        guard !target.isSecure else { throw HormeFlowError.secureField }
+        guard Self.isAccessibilityTrusted else { throw HormeFlowError.accessibilityDenied }
+        guard let expectedPID = target.processIdentifier else {
+            throw HormeFlowError.insertionFailed
         }
 
-        if let element = target.element,
-           AXUIElementSetAttributeValue(element, kAXSelectedTextAttribute as CFString, text as CFTypeRef) == .success {
-            return
+        let currentElement = Self.focusedElement()
+        var currentPID: pid_t = 0
+        if let currentElement {
+            AXUIElementGetPid(currentElement, &currentPID)
+        } else {
+            currentPID = NSWorkspace.shared.frontmostApplication?.processIdentifier ?? 0
+        }
+        guard currentPID == expectedPID else { throw HormeFlowError.insertionFailed }
+
+        if Self.isSecure(currentElement) { throw HormeFlowError.secureField }
+
+        // Web and Electron editors may replace their Accessibility node while
+        // Whisper is running. Try both the original node and the currently
+        // focused node, without reading either control's contents.
+        for element in [target.element, currentElement].compactMap({ $0 }) {
+            if AXUIElementSetAttributeValue(element, kAXSelectedTextAttribute as CFString, text as CFTypeRef) == .success {
+                return
+            }
         }
 
-        guard Self.isAccessibilityTrusted else { throw VibeFlowError.accessibilityDenied }
         try await pasteWithRestoration(text)
+    }
+
+    private static func focusedElement() -> AXUIElement? {
+        let system = AXUIElementCreateSystemWide()
+        var value: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(system, kAXFocusedUIElementAttribute as CFString, &value) == .success,
+              let value else { return nil }
+        return (value as! AXUIElement)
+    }
+
+    private static func isSecure(_ element: AXUIElement?) -> Bool {
+        guard let element else { return false }
+        var roleValue: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(element, kAXRoleAttribute as CFString, &roleValue) == .success else {
+            return false
+        }
+        return (roleValue as? String) == "AXSecureTextField"
     }
 
     private func pasteWithRestoration(_ text: String) async throws {
@@ -60,7 +96,7 @@ public final class AccessibilityInsertionService: TextInserting, @unchecked Send
         let snapshot = ClipboardSnapshot.capture(from: pasteboard)
         pasteboard.clearContents()
         guard pasteboard.setString(text, forType: .string) else {
-            throw VibeFlowError.insertionFailed
+            throw HormeFlowError.insertionFailed
         }
         let temporaryChangeCount = pasteboard.changeCount
 
@@ -68,14 +104,25 @@ public final class AccessibilityInsertionService: TextInserting, @unchecked Send
               let keyDown = CGEvent(keyboardEventSource: source, virtualKey: 9, keyDown: true),
               let keyUp = CGEvent(keyboardEventSource: source, virtualKey: 9, keyDown: false) else {
             snapshot.restore(to: pasteboard)
-            throw VibeFlowError.insertionFailed
+            throw HormeFlowError.insertionFailed
         }
         keyDown.flags = .maskCommand
         keyUp.flags = .maskCommand
-        keyDown.post(tap: .cghidEventTap)
-        keyUp.post(tap: .cghidEventTap)
+        do {
+            try await Task.sleep(for: .milliseconds(24))
+            keyDown.post(tap: .cghidEventTap)
+            try await Task.sleep(for: .milliseconds(18))
+            keyUp.post(tap: .cghidEventTap)
 
-        try await Task.sleep(for: .milliseconds(160))
+            // Chromium/Electron editors can consume synthetic paste events on
+            // a later run-loop turn. Keep the lease alive before restoration.
+            try await Task.sleep(for: .milliseconds(650))
+        } catch {
+            if pasteboard.changeCount == temporaryChangeCount {
+                snapshot.restore(to: pasteboard)
+            }
+            throw error
+        }
         if pasteboard.changeCount == temporaryChangeCount {
             snapshot.restore(to: pasteboard)
         }

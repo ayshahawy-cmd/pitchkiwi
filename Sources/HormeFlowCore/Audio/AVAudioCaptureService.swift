@@ -8,12 +8,18 @@ public final class AVAudioCaptureService: AudioCapturing, @unchecked Sendable {
     private var nativeSampleRate: Double = 48_000
     private var startedAt: Date?
     private var running = false
+    public let levels: AsyncStream<Float>
+    private let levelContinuation: AsyncStream<Float>.Continuation
 
-    public init() {}
+    public init() {
+        let pair = AsyncStream<Float>.makeStream(bufferingPolicy: .bufferingNewest(1))
+        levels = pair.stream
+        levelContinuation = pair.continuation
+    }
 
     public func start() async throws {
         let allowed = await requestMicrophoneAccess()
-        guard allowed else { throw VibeFlowError.microphonePermissionDenied }
+        guard allowed else { throw HormeFlowError.microphonePermissionDenied }
 
         lock.withLock {
             samples.removeAll(keepingCapacity: true)
@@ -23,7 +29,7 @@ public final class AVAudioCaptureService: AudioCapturing, @unchecked Sendable {
         let input = engine.inputNode
         let format = input.inputFormat(forBus: 0)
         guard format.sampleRate > 0, format.channelCount > 0 else {
-            throw VibeFlowError.microphoneUnavailable
+            throw HormeFlowError.microphoneUnavailable
         }
         nativeSampleRate = format.sampleRate
         let maximumFrames = Int(format.sampleRate * 300)
@@ -32,10 +38,15 @@ public final class AVAudioCaptureService: AudioCapturing, @unchecked Sendable {
         input.installTap(onBus: 0, bufferSize: 1_024, format: format) { [weak self] buffer, _ in
             guard let self, let channel = buffer.floatChannelData?.pointee else { return }
             let count = Int(buffer.frameLength)
+            let values = UnsafeBufferPointer(start: channel, count: count)
+            let meanSquare = values.reduce(Float.zero) { $0 + ($1 * $1) } / Float(max(count, 1))
+            let decibels = 20 * log10(max(sqrt(meanSquare), 0.000_1))
+            let normalizedLevel = min(1, max(0, (decibels + 55) / 45))
+            self.levelContinuation.yield(normalizedLevel)
             self.lock.withLock {
                 if self.samples.count < maximumFrames {
                     let accepted = min(count, maximumFrames - self.samples.count)
-                    self.samples.append(contentsOf: UnsafeBufferPointer(start: channel, count: accepted))
+                    self.samples.append(contentsOf: values.prefix(accepted))
                 }
             }
         }
@@ -47,15 +58,16 @@ public final class AVAudioCaptureService: AudioCapturing, @unchecked Sendable {
         } catch {
             input.removeTap(onBus: 0)
             clear()
-            throw VibeFlowError.microphoneUnavailable
+            throw HormeFlowError.microphoneUnavailable
         }
     }
 
     public func stop() async throws -> CapturedAudio {
-        guard running else { throw VibeFlowError.microphoneUnavailable }
+        guard running else { throw HormeFlowError.microphoneUnavailable }
         engine.inputNode.removeTap(onBus: 0)
         engine.stop()
         running = false
+        levelContinuation.yield(0)
 
         let (captured, start) = lock.withLock {
             let result = (samples, startedAt)
@@ -75,6 +87,7 @@ public final class AVAudioCaptureService: AudioCapturing, @unchecked Sendable {
             engine.stop()
             running = false
         }
+        levelContinuation.yield(0)
         clear()
     }
 

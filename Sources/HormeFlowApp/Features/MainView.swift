@@ -1,6 +1,6 @@
 import AppKit
 import SwiftUI
-import VibeFlowCore
+import HormeFlowCore
 
 private enum Destination: String, CaseIterable, Identifiable {
     case home = "Home"
@@ -56,18 +56,20 @@ struct MainView: View {
             }
             .navigationSplitViewColumnWidth(min: 210, ideal: 230)
         } detail: {
-            Group {
-                switch selection ?? .home {
-                case .home: HomeView(model: model)
-                case .dictionary: DictionaryView(store: model.store)
-                case .snippets: SnippetsView(store: model.store)
-                case .styles: StylesView(store: model.store)
-                case .transforms: TransformsView(model: model)
-                case .insights: InsightsView(store: model.store)
-                case .settings: SettingsView(model: model)
+            ZStack {
+                HormeBackdrop()
+                Group {
+                    switch selection ?? .home {
+                    case .home: HomeView(model: model)
+                    case .dictionary: DictionaryView(store: model.store)
+                    case .snippets: SnippetsView(store: model.store)
+                    case .styles: StylesView(store: model.store)
+                    case .transforms: TransformsView(model: model)
+                    case .insights: InsightsView(store: model.store)
+                    case .settings: SettingsView(model: model)
+                    }
                 }
             }
-            .background(Color(nsColor: .windowBackgroundColor))
         }
         .tint(Color(red: 0.48, green: 0.68, blue: 0.10))
     }
@@ -85,7 +87,7 @@ private struct BrandHeader: View {
                     .foregroundStyle(.black)
             }
             VStack(alignment: .leading, spacing: 0) {
-                Text("VibeFlow").font(.headline)
+                Text("Horme Flow").font(.headline)
                 Text("LOCAL DICTATION")
                     .font(.system(size: 8, weight: .bold, design: .monospaced))
                     .foregroundStyle(.secondary)
@@ -113,7 +115,7 @@ private struct PrivacyBadge: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)
-        .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .hormeGlass(cornerRadius: 14)
     }
 }
 
@@ -126,13 +128,22 @@ private struct HomeView: View {
                 PageHeader(
                     eyebrow: "SPEAK AT THE SPEED OF THOUGHT",
                     title: "Your voice, directly into your work.",
-                    subtitle: "Hold the fn/Globe key anywhere on your Mac, or double-press it for hands-free dictation. VibeFlow transcribes locally and never submits."
+                    subtitle: "Hold the fn/Globe key anywhere on your Mac, or double-press it for hands-free dictation. Horme Flow transcribes locally and never submits."
                 )
 
                 HStack(spacing: 14) {
                     StatusCard(title: "Microphone", value: model.microphoneAuthorized ? "Ready" : "Needs access", icon: "mic.fill", ready: model.microphoneAuthorized)
                     StatusCard(title: "Whisper model", value: model.modelReady ? "base.en ready" : "Import model", icon: "cpu", ready: model.modelReady)
                     StatusCard(title: "Insertion", value: model.accessibilityAuthorized ? "Ready" : "Needs access", icon: "cursorarrow.click.2", ready: model.accessibilityAuthorized)
+                }
+
+                if !model.accessibilityAuthorized {
+                    Button {
+                        model.requestAccessibility()
+                    } label: {
+                        Label("Enable cross-app insertion", systemImage: "hand.raised.fill")
+                    }
+                    .buttonStyle(.borderedProminent)
                 }
 
                 HStack(spacing: 16) {
@@ -203,8 +214,7 @@ private struct StatusCard: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.background, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(.separator.opacity(0.45)))
+        .hormeGlass(cornerRadius: 16)
     }
 }
 
@@ -219,7 +229,7 @@ private struct KeyCap: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
-        .background(.quaternary, in: RoundedRectangle(cornerRadius: 11))
+        .hormeGlass(cornerRadius: 11)
     }
 }
 
@@ -331,7 +341,7 @@ private struct StylesView: View {
                     Toggle("Developer formatting", isOn: $store.developerMode)
                 }
 
-                SettingCard(icon: "terminal", title: "Terminal safety", description: "VibeFlow inserts text only. It never synthesizes Return or executes the command.") {
+                SettingCard(icon: "terminal", title: "Terminal safety", description: "Horme Flow inserts text only. It never synthesizes Return or executes the command.") {
                     Label("Always on", systemImage: "checkmark.shield.fill").foregroundStyle(.green)
                 }
 
@@ -389,8 +399,7 @@ private struct TransformCard: View {
         }
         .padding(18)
         .frame(maxWidth: .infinity, minHeight: 170, alignment: .leading)
-        .background(.background, in: RoundedRectangle(cornerRadius: 18))
-        .overlay(RoundedRectangle(cornerRadius: 18).stroke(.separator.opacity(0.45)))
+        .hormeGlass(cornerRadius: 18, interactive: true)
     }
 }
 
@@ -409,7 +418,7 @@ private struct InsightsView: View {
                 GroupBox {
                     VStack(alignment: .leading, spacing: 14) {
                         Text("Privacy-respecting by design").font(.headline)
-                        Text("VibeFlow records aggregate counts, not app titles, document names, audio, or dictated text when History is off.")
+                        Text("Horme Flow records aggregate counts, not app titles, document names, audio, or dictated text when History is off.")
                             .foregroundStyle(.secondary)
                         Button("Reset metrics", role: .destructive) { store.resetMetrics() }
                     }
@@ -436,8 +445,7 @@ private struct MetricCard: View {
         }
         .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.background, in: RoundedRectangle(cornerRadius: 18))
-        .overlay(RoundedRectangle(cornerRadius: 18).stroke(.separator.opacity(0.45)))
+        .hormeGlass(cornerRadius: 18)
     }
 }
 
@@ -468,7 +476,7 @@ private struct SettingsView: View {
                     Button("Import .bin…") { model.importModel() }
                 }
 
-                SettingCard(icon: "cursorarrow.click.2", title: "Accessibility", description: model.accessibilityAuthorized ? "Granted. VibeFlow can insert at your cursor." : "Required only for inserting into other apps.") {
+                SettingCard(icon: "cursorarrow.click.2", title: "Accessibility", description: model.accessibilityAuthorized ? "Granted. Horme Flow can insert at your cursor." : "Required to insert into other apps. Click Grant access, enable Horme Flow, then return here.") {
                     Button(model.accessibilityAuthorized ? "Granted" : "Grant access") { model.requestAccessibility() }
                         .disabled(model.accessibilityAuthorized)
                 }
@@ -544,7 +552,46 @@ private struct SettingCard<Accessory: View>: View {
             accessory()
         }
         .padding(18)
-        .background(.background, in: RoundedRectangle(cornerRadius: 16))
-        .overlay(RoundedRectangle(cornerRadius: 16).stroke(.separator.opacity(0.45)))
+        .hormeGlass(cornerRadius: 16)
+    }
+}
+
+private struct HormeBackdrop: View {
+    var body: some View {
+        ZStack {
+            Color(nsColor: .windowBackgroundColor)
+            LinearGradient(
+                colors: [
+                    Color(red: 0.72, green: 0.98, blue: 0.30).opacity(0.10),
+                    Color(red: 0.38, green: 0.71, blue: 0.65).opacity(0.06),
+                    .clear,
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            Circle()
+                .fill(Color(red: 0.60, green: 0.52, blue: 1).opacity(0.07))
+                .frame(width: 420, height: 420)
+                .blur(radius: 90)
+                .offset(x: 310, y: 250)
+        }
+        .ignoresSafeArea()
+        .accessibilityHidden(true)
+    }
+}
+
+private extension View {
+    @ViewBuilder
+    func hormeGlass(cornerRadius: CGFloat, interactive: Bool = false) -> some View {
+        if #available(macOS 26.0, *) {
+            if interactive {
+                glassEffect(.regular.tint(.white.opacity(0.035)).interactive(), in: .rect(cornerRadius: cornerRadius))
+            } else {
+                glassEffect(.regular.tint(.white.opacity(0.035)), in: .rect(cornerRadius: cornerRadius))
+            }
+        } else {
+            background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous).stroke(.white.opacity(0.10)))
+        }
     }
 }

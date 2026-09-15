@@ -2,7 +2,7 @@ import AppKit
 import AVFoundation
 import Combine
 import Foundation
-import VibeFlowCore
+import HormeFlowCore
 
 @MainActor
 final class AppModel: ObservableObject {
@@ -13,6 +13,8 @@ final class AppModel: ObservableObject {
     @Published private(set) var lastTranscript = ""
     @Published private(set) var modelURL: URL?
     @Published private(set) var handsFreeMode = false
+    @Published private(set) var audioLevel: Float = 0
+    @Published private(set) var accessibilityAuthorized = AccessibilityInsertionService.isAccessibilityTrusted
     @Published var scratchpad = ""
 
     let store = LocalStore()
@@ -25,6 +27,8 @@ final class AppModel: ObservableObject {
     private var activeTask: Task<Void, Never>?
     private var audioIsCapturing = false
     private var releaseRequested = false
+    private var levelTask: Task<Void, Never>?
+    private var permissionTask: Task<Void, Never>?
 
     lazy var shortcutMonitor = GlobalShortcutMonitor { [weak self] action in
         guard let self else { return }
@@ -44,10 +48,6 @@ final class AppModel: ObservableObject {
 
     var microphoneAuthorized: Bool {
         AVCaptureDevice.authorizationStatus(for: .audio) == .authorized
-    }
-
-    var accessibilityAuthorized: Bool {
-        AccessibilityInsertionService.isAccessibilityTrusted
     }
 
     var modelReady: Bool { modelURL != nil }
@@ -78,6 +78,7 @@ final class AppModel: ObservableObject {
         releaseRequested = false
         audioIsCapturing = false
         activeTask?.cancel()
+        stopLevelMonitoring()
         activeTask = Task {
             try? await move(to: .cancelling)
             await audio.cancel()
@@ -118,7 +119,12 @@ final class AppModel: ObservableObject {
 
     func requestAccessibility() {
         AccessibilityInsertionService.requestAccessibilityAccess()
-        objectWillChange.send()
+        AccessibilityInsertionService.openAccessibilitySettings()
+        beginPermissionRefresh()
+    }
+
+    func refreshPermissions() {
+        accessibilityAuthorized = AccessibilityInsertionService.isAccessibilityTrusted
     }
 
     func importModel() {
@@ -144,6 +150,13 @@ final class AppModel: ObservableObject {
     }
 
     private func startFlow() async {
+        refreshPermissions()
+        guard accessibilityAuthorized else {
+            statusText = "Grant Accessibility to insert text"
+            showMainWindow()
+            requestAccessibility()
+            return
+        }
         if phase == .result || phase == .error {
             await machine.reset()
             phase = .idle
@@ -154,6 +167,7 @@ final class AppModel: ObservableObject {
             insertionTarget = await inserter.captureTarget()
             try await audio.start()
             audioIsCapturing = true
+            beginLevelMonitoring()
             if releaseRequested {
                 releaseRequested = false
                 await finishFlow()
@@ -169,7 +183,8 @@ final class AppModel: ObservableObject {
             statusText = "Transcribing locally"
             let captured = try await audio.stop()
             audioIsCapturing = false
-            guard let modelURL else { throw VibeFlowError.modelMissing }
+            stopLevelMonitoring()
+            guard let modelURL else { throw HormeFlowError.modelMissing }
 
             let hints = store.dictionary.filter(\.isEnabled).map(\.writtenForm)
             let raw = try await transcriber.transcribe(captured, modelURL: modelURL, hints: hints)
@@ -200,6 +215,8 @@ final class AppModel: ObservableObject {
                 showMainWindow()
             }
         } catch is CancellationError {
+            stopLevelMonitoring()
+            audioIsCapturing = false
             await audio.cancel()
             await machine.reset()
             phase = .idle
@@ -218,6 +235,7 @@ final class AppModel: ObservableObject {
         handsFreeMode = false
         releaseRequested = false
         audioIsCapturing = false
+        stopLevelMonitoring()
         await audio.cancel()
         let current = await machine.phase
         if [.listening, .transcribing, .refining, .inserting].contains(current) {
@@ -228,5 +246,37 @@ final class AppModel: ObservableObject {
         phase = .error
         statusText = error.localizedDescription
         showMainWindow()
+    }
+
+    private func beginLevelMonitoring() {
+        levelTask?.cancel()
+        let stream = audio.levels
+        levelTask = Task { [weak self] in
+            for await level in stream {
+                guard !Task.isCancelled else { return }
+                self?.audioLevel = level
+            }
+        }
+    }
+
+    private func stopLevelMonitoring() {
+        levelTask?.cancel()
+        levelTask = nil
+        audioLevel = 0
+    }
+
+    private func beginPermissionRefresh() {
+        permissionTask?.cancel()
+        permissionTask = Task { [weak self] in
+            for _ in 0..<120 {
+                guard !Task.isCancelled else { return }
+                self?.refreshPermissions()
+                if self?.accessibilityAuthorized == true {
+                    self?.statusText = "Insertion ready"
+                    return
+                }
+                try? await Task.sleep(for: .milliseconds(500))
+            }
+        }
     }
 }

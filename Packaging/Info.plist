@@ -5,21 +5,21 @@
     <key>CFBundleDevelopmentRegion</key>
     <string>en</string>
     <key>CFBundleExecutable</key>
-    <string>VibeFlow</string>
-	<key>CFBundleIdentifier</key>
-	<string>com.vibeflow.local</string>
-	<key>CFBundleIconFile</key>
-	<string>VibeFlow</string>
+    <string>HormeFlow</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.horme.flow</string>
+    <key>CFBundleIconFile</key>
+    <string>HormeFlow</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundleName</key>
-    <string>VibeFlow</string>
+    <string>Horme Flow</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
-    <string>0.3.0</string>
+    <string>0.4.0</string>
     <key>CFBundleVersion</key>
-    <string>2</string>
+    <string>3</string>
     <key>LSMinimumSystemVersion</key>
     <string>14.0</string>
     <key>LSUIElement</key>
@@ -27,7 +27,7 @@
     <key>NSHighResolutionCapable</key>
     <true/>
     <key>NSMicrophoneUsageDescription</key>
-    <string>VibeFlow uses the microphone only while you dictate. Audio is processed locally and is never saved.</string>
+    <string>Horme Flow uses the microphone only while you dictate. Audio is processed locally and is never saved.</string>
     <key>NSPrincipalClass</key>
     <string>NSApplication</string>
 </dict>

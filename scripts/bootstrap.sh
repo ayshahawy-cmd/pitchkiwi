@@ -21,8 +21,8 @@ trap cleanup EXIT
 mkdir -p "$VENDOR_DIR" "$MODEL_DIR"
 
 if [[ ! -d "$VENDOR_DIR/whisper.xcframework" ]]; then
-  ARCHIVE="$(mktemp -t vibeflow-whisper).zip"
-  EXTRACT_DIR="$(mktemp -d -t vibeflow-whisper)"
+  ARCHIVE="$(mktemp -t horme-flow-whisper).zip"
+  EXTRACT_DIR="$(mktemp -d -t horme-flow-whisper)"
   TEMP_PATHS+=("$ARCHIVE" "$EXTRACT_DIR")
   curl -fL "$FRAMEWORK_URL" -o "$ARCHIVE"
   echo "$FRAMEWORK_SHA  $ARCHIVE" | shasum -a 256 -c -
@@ -31,7 +31,7 @@ if [[ ! -d "$VENDOR_DIR/whisper.xcframework" ]]; then
 fi
 
 if [[ "$FRAMEWORK_ONLY" != "--framework-only" && ! -f "$MODEL_DIR/ggml-base.en.bin" ]]; then
-  MODEL_TEMP="$(mktemp -t vibeflow-model).bin"
+  MODEL_TEMP="$(mktemp -t horme-flow-model).bin"
   TEMP_PATHS+=("$MODEL_TEMP")
   curl -fL "$MODEL_URL" -o "$MODEL_TEMP"
   echo "$MODEL_SHA  $MODEL_TEMP" | shasum -a 256 -c -
@@ -39,4 +39,4 @@ if [[ "$FRAMEWORK_ONLY" != "--framework-only" && ! -f "$MODEL_DIR/ggml-base.en.b
   chmod 600 "$MODEL_DIR/ggml-base.en.bin"
 fi
 
-echo "VibeFlow dependencies are ready."
+echo "Horme Flow dependencies are ready."
