@@ -888,6 +888,7 @@ private struct KiwiBackdrop: View {
 private extension View {
     @ViewBuilder
     func kiwiGlass(cornerRadius: CGFloat, interactive: Bool = false) -> some View {
+#if compiler(>=6.2)
         if #available(macOS 26.0, *) {
             if interactive {
                 glassEffect(.regular.tint(.white.opacity(0.035)).interactive(), in: .rect(cornerRadius: cornerRadius))
@@ -898,5 +899,9 @@ private extension View {
             background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
                 .overlay(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous).stroke(.white.opacity(0.10)))
         }
+#else
+        background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous).stroke(.white.opacity(0.10)))
+#endif
     }
 }

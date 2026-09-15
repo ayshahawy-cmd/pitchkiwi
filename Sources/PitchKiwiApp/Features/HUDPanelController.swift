@@ -143,11 +143,16 @@ private struct LiveWaveform: View {
 private extension View {
     @ViewBuilder
     func tinyLiquidGlass() -> some View {
+#if compiler(>=6.2)
         if #available(macOS 26.0, *) {
             glassEffect(.regular.tint(.black.opacity(0.08)), in: .capsule)
         } else {
             background(.ultraThinMaterial, in: Capsule(style: .continuous))
                 .overlay(Capsule(style: .continuous).stroke(.white.opacity(0.18)))
         }
+#else
+        background(.ultraThinMaterial, in: Capsule(style: .continuous))
+            .overlay(Capsule(style: .continuous).stroke(.white.opacity(0.18)))
+#endif
     }
 }
