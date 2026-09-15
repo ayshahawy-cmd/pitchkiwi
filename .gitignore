@@ -1,0 +1,44 @@
+# Xcode and Swift
+.build/
+DerivedData/
+build/
+*.xcuserstate
+xcuserdata/
+.swiftpm/
+.vendor/
+.models/
+.DS_Store
+
+# Local app data and privacy-sensitive artifacts
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.db
+*.log
+*.wav
+*.m4a
+*.mp3
+Recordings/
+Transcripts/
+
+# Model weights and generated model bundles
+Models/
+models/
+*.bin
+*.gguf
+*.mlmodel
+*.mlmodelc/
+
+# Signing and local configuration
+*.p12
+*.cer
+*.mobileprovision
+*.provisionprofile
+.env
+.env.*
+!.env.example
+Local.xcconfig
+
+# Dependency and tooling caches
+.cache/
+.swiftlint_cache/
