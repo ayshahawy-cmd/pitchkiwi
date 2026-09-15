@@ -126,7 +126,7 @@ private struct HomeView: View {
                 PageHeader(
                     eyebrow: "SPEAK AT THE SPEED OF THOUGHT",
                     title: "Your voice, directly into your work.",
-                    subtitle: "Hold Option + Space anywhere on your Mac. VibeFlow transcribes locally, cleans the text, and inserts it without submitting."
+                    subtitle: "Hold the fn/Globe key anywhere on your Mac, or double-press it for hands-free dictation. VibeFlow transcribes locally and never submits."
                 )
 
                 HStack(spacing: 14) {
@@ -147,7 +147,7 @@ private struct HomeView: View {
                     .buttonStyle(.borderedProminent)
                     .tint(Color(red: 0.42, green: 0.61, blue: 0.08))
 
-                    KeyCap(text: "⌥ SPACE", detail: "hold to talk")
+                    KeyCap(text: "fn", detail: "hold · double-press hands-free")
                 }
 
                 GroupBox {
@@ -455,6 +455,14 @@ private struct SettingsView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 PageHeader(eyebrow: "CONTROL THE BOUNDARY", title: "Settings", subtitle: "Microphone → this Mac → your cursor. No account and no cloud transcription.")
+
+                SettingCard(icon: "keyboard", title: "Fn key dictation", description: "Hold fn and release to insert. Double-press fn to keep listening hands-free; press fn once more to stop.") {
+                    Text("fn")
+                        .font(.system(size: 13, weight: .bold, design: .monospaced))
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 7)
+                        .background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
+                }
 
                 SettingCard(icon: "cpu", title: "Whisper model", description: model.modelURL?.lastPathComponent ?? "No local model found") {
                     Button("Import .bin…") { model.importModel() }

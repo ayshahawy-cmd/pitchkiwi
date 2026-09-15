@@ -2,14 +2,14 @@
 
 > A private, local-first voice-to-text app for developers on macOS.
 
-VibeFlow lets you hold **Option + Space**, speak, and release to insert polished text into the app you were using. Microphone audio stays in memory, transcription runs through `whisper.cpp` on your Mac, and no account or server is involved.
+VibeFlow lets you hold the **Fn/Globe key**, speak, and release to insert polished text into the app you were using. Double-press Fn to dictate hands-free, then press it once more to stop. Microphone audio stays in memory, transcription runs through `whisper.cpp` on your Mac, and no account or server is involved.
 
 This is an original open-source implementation inspired by the fluid interaction model of modern dictation tools. It does not use Wispr Flow source code, private APIs, branding, copy, or visual assets.
 
 ## What works today
 
 - Native SwiftUI/AppKit app and menu-bar control—no Electron.
-- Global push-to-talk with a compact floating HUD.
+- Global Fn-key push-to-talk and double-press hands-free mode with a compact floating HUD.
 - In-memory microphone capture; raw audio is never written to disk.
 - Local Whisper transcription with Metal acceleration.
 - Accessibility-first insertion into editors, terminals, browsers, and chat fields.
@@ -46,11 +46,13 @@ The app remains useful without Accessibility permission: completed text stays av
 ## Use it
 
 1. Put the cursor in any normal text field.
-2. Hold **Option + Space**.
+2. Hold the **Fn/Globe key**. For hands-free dictation, double-press Fn.
 3. Speak naturally.
-4. Release the keys and wait for local transcription.
+4. Release Fn to finish, or press Fn once to finish hands-free dictation.
 
 VibeFlow inserts text but never submits a form or executes a terminal command. Press **Escape** while listening to cancel. The first transcription can be slower while Metal compiles its local kernels; later runs are faster.
+
+If macOS also opens Emoji & Symbols, changes input source, or starts Apple Dictation when you press Fn, open **System Settings → Keyboard** and set the Fn/Globe-key action to **Do Nothing**. VibeFlow still receives the key through Accessibility while it is running.
 
 ## Privacy model
 
@@ -116,7 +118,7 @@ docs/                      product, architecture, security, and UX specs
 
 ## Current scope and roadmap
 
-The working MVP is English-first and targets Apple Silicon. It provides non-streaming push-to-talk, deterministic cleanup, and local JSON persistence. Planned follow-ups include configurable hotkeys, multilingual model selection, streaming partials, richer transforms through an optional local model, encrypted export/import, release notarization, and deeper app compatibility testing.
+The working MVP is English-first and targets Apple Silicon. It provides Fn push-to-talk, double-press hands-free mode, deterministic cleanup, and local JSON persistence. Planned follow-ups include user-selectable alternate hotkeys, multilingual model selection, streaming partials, richer transforms through an optional local model, encrypted export/import, release notarization, and deeper app compatibility testing.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request. Preserve [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) in redistributed builds.
 

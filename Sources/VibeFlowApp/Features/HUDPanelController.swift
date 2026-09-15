@@ -109,7 +109,7 @@ private struct HUDView: View {
 
     private var detail: String {
         switch model.phase {
-        case .listening: "Release ⌥ Space to insert"
+        case .listening: model.handsFreeMode ? "Press fn once to stop" : "Release fn to insert · double-press for hands-free"
         case .transcribing, .refining: "Nothing leaves this Mac"
         case .inserting: "Never submits or presses Return"
         case .result: model.lastTranscript.isEmpty ? "Done" : "Saved as last transcript"

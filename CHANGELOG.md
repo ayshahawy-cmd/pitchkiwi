@@ -15,3 +15,4 @@ All notable changes will be documented here. This project follows Keep a Changel
 - Accessibility-first cross-app insertion with clipboard restoration fallback.
 - Local dictionary, snippets, developer formatting, scratchpad, insights, and retention controls.
 - Checksum-pinned bootstrap, signed app-bundle packaging, smoke-test CLI, and XCTest suite.
+- Fn/Globe-key push-to-talk and double-press hands-free dictation gestures.

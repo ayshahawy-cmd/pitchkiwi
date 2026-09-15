@@ -12,6 +12,7 @@ final class AppModel: ObservableObject {
     @Published private(set) var statusText = "Ready"
     @Published private(set) var lastTranscript = ""
     @Published private(set) var modelURL: URL?
+    @Published private(set) var handsFreeMode = false
     @Published var scratchpad = ""
 
     let store = LocalStore()
@@ -22,12 +23,17 @@ final class AppModel: ObservableObject {
     private let inserter: TextInserting = AccessibilityInsertionService()
     private var insertionTarget = InsertionTarget(processIdentifier: nil, element: nil, isSecure: false)
     private var activeTask: Task<Void, Never>?
+    private var audioIsCapturing = false
+    private var releaseRequested = false
 
     lazy var shortcutMonitor = GlobalShortcutMonitor { [weak self] action in
         guard let self else { return }
         switch action {
         case .pressed: self.beginDictation()
         case .released: self.finishDictation()
+        case .handsFree:
+            self.handsFreeMode = true
+            self.statusText = "Hands-free listening"
         case .cancel: self.cancelDictation()
         }
     }
@@ -48,18 +54,29 @@ final class AppModel: ObservableObject {
 
     func beginDictation() {
         guard !phase.isActive else { return }
+        releaseRequested = false
         activeTask?.cancel()
         activeTask = Task { await startFlow() }
     }
 
     func finishDictation() {
         guard phase == .listening else { return }
+        handsFreeMode = false
+        guard audioIsCapturing else {
+            releaseRequested = true
+            statusText = "Finishing after microphone setup"
+            return
+        }
         activeTask?.cancel()
         activeTask = Task { await finishFlow() }
     }
 
     func cancelDictation() {
         guard phase.isActive else { return }
+        shortcutMonitor.resetInteraction()
+        handsFreeMode = false
+        releaseRequested = false
+        audioIsCapturing = false
         activeTask?.cancel()
         activeTask = Task {
             try? await move(to: .cancelling)
@@ -71,7 +88,12 @@ final class AppModel: ObservableObject {
     }
 
     func toggleDictation() {
-        phase == .listening ? finishDictation() : beginDictation()
+        shortcutMonitor.resetInteraction()
+        if phase == .listening {
+            finishDictation()
+        } else {
+            beginDictation()
+        }
     }
 
     func copyLastTranscript() {
@@ -131,6 +153,11 @@ final class AppModel: ObservableObject {
             statusText = "Listening"
             insertionTarget = await inserter.captureTarget()
             try await audio.start()
+            audioIsCapturing = true
+            if releaseRequested {
+                releaseRequested = false
+                await finishFlow()
+            }
         } catch {
             await fail(error)
         }
@@ -141,6 +168,7 @@ final class AppModel: ObservableObject {
             try await move(to: .transcribing)
             statusText = "Transcribing locally"
             let captured = try await audio.stop()
+            audioIsCapturing = false
             guard let modelURL else { throw VibeFlowError.modelMissing }
 
             let hints = store.dictionary.filter(\.isEnabled).map(\.writtenForm)
@@ -186,6 +214,10 @@ final class AppModel: ObservableObject {
     }
 
     private func fail(_ error: Error) async {
+        shortcutMonitor.resetInteraction()
+        handsFreeMode = false
+        releaseRequested = false
+        audioIsCapturing = false
         await audio.cancel()
         let current = await machine.phase
         if [.listening, .transcribing, .refining, .inserting].contains(current) {
@@ -198,4 +230,3 @@ final class AppModel: ObservableObject {
         showMainWindow()
     }
 }
-

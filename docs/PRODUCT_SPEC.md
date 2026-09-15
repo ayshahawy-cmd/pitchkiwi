@@ -99,7 +99,7 @@ Notetaker and team/billing navigation from the references are intentionally excl
 | State | HUD | Input behavior | Exit |
 | --- | --- | --- | --- |
 | Idle | hidden or tiny ready dot | shortcut available | shortcut down |
-| Listening | waveform + `Listening` + timer | capture audio; Escape cancels | shortcut up |
+| Listening | waveform + `Listening` + timer | capture audio; Escape cancels; double-press Fn locks hands-free | Fn up, or Fn down while hands-free |
 | Transcribing | progress pulse + `Transcribing locally` | target snapshot retained | transcript or error |
 | Refining | stable text shimmer + `Cleaning up` | deterministic/optional local transform | result or error |
 | Inserting | check motion + `Inserting` | replace/paste; never submit | success/failure |
@@ -258,4 +258,3 @@ With history set to Never, completing dictation and restarting the app leaves no
 - Whether optional local LLM support ships in v1.0 or v1.1.
 - Distribution: Developer ID DMG only initially, or Homebrew Cask as well.
 - Minimum hardware disclosure for each model tier.
-

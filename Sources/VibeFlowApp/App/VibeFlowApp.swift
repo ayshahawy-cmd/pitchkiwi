@@ -64,7 +64,7 @@ private struct MenuBarContent: View {
         Button(model.phase == .listening ? "Stop Dictation" : "Start Dictation") {
             model.toggleDictation()
         }
-        Text("Hold ⌥ Space to talk")
+        Text(model.handsFreeMode ? "Hands-free • press fn to stop" : "Hold fn • double-press for hands-free")
         Divider()
         Button("Copy Last Transcript") { model.copyLastTranscript() }
             .disabled(model.lastTranscript.isEmpty)
