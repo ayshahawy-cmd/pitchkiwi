@@ -2,7 +2,7 @@ import AppKit
 import AVFoundation
 import Combine
 import Foundation
-import HormeFlowCore
+import VibeFlowCore
 
 @MainActor
 final class AppModel: ObservableObject {
@@ -184,7 +184,7 @@ final class AppModel: ObservableObject {
             let captured = try await audio.stop()
             audioIsCapturing = false
             stopLevelMonitoring()
-            guard let modelURL else { throw HormeFlowError.modelMissing }
+            guard let modelURL else { throw VibeFlowError.modelMissing }
 
             let hints = store.dictionary.filter(\.isEnabled).map(\.writtenForm)
             let raw = try await transcriber.transcribe(captured, modelURL: modelURL, hints: hints)

@@ -1,14 +1,14 @@
 import AppKit
 import SwiftUI
-import HormeFlowCore
+import VibeFlowCore
 
 @main
-struct HormeFlowApp: App {
+struct VibeFlowApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var model = AppModel.shared
 
     var body: some Scene {
-        WindowGroup("Horme Flow", id: "main") {
+        WindowGroup("VibeFlow", id: "main") {
             MainView(model: model)
                 .frame(minWidth: 900, minHeight: 620)
         }
@@ -34,7 +34,7 @@ struct HormeFlowApp: App {
             MenuBarContent(model: model)
         } label: {
             Image(systemName: model.phase == .listening ? "waveform.circle.fill" : "waveform.circle")
-                .accessibilityLabel(model.phase == .listening ? "Horme Flow is listening" : "Horme Flow")
+                .accessibilityLabel(model.phase == .listening ? "VibeFlow is listening" : "VibeFlow")
         }
         .menuBarExtraStyle(.menu)
     }
@@ -73,10 +73,10 @@ private struct MenuBarContent: View {
         Divider()
         Button("Copy Last Transcript") { model.copyLastTranscript() }
             .disabled(model.lastTranscript.isEmpty)
-        Button("Open Horme Flow") { model.showMainWindow() }
+        Button("Open VibeFlow") { model.showMainWindow() }
         Divider()
         Text("Local • History \(model.store.retention == .never ? "off" : "on") • Context \(model.store.contextEnabled ? "on" : "off")")
         Divider()
-        Button("Quit Horme Flow") { NSApp.terminate(nil) }
+        Button("Quit VibeFlow") { NSApp.terminate(nil) }
     }
 }

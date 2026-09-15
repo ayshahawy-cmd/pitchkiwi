@@ -8,7 +8,7 @@ You are the principal macOS engineer, product designer, privacy engineer, QA lea
 
 ## Mission
 
-Create Horme Flow, a polished local-first macOS dictation application for developers, vibe coders, and people who speak long prompts. It should feel immediate and native: hold a global shortcut, speak, release, and receive clean text at the active cursor in nearly any Mac app.
+Create VibeFlow, a polished local-first macOS dictation application for developers, vibe coders, and people who speak long prompts. It should feel immediate and native: hold a global shortcut, speak, release, and receive clean text at the active cursor in nearly any Mac app.
 
 Transcription and all text processing must run locally. No dictated audio, transcript, selected text, clipboard content, nearby UI text, dictionary data, snippet data, or history may be sent over a network. Do not add accounts, analytics, crash-upload SDKs, remote configuration, or silent cloud fallback.
 

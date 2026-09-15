@@ -45,10 +45,10 @@ public final class AccessibilityInsertionService: TextInserting, @unchecked Send
     }
 
     public func insert(_ text: String, into target: InsertionTarget) async throws {
-        guard !target.isSecure else { throw HormeFlowError.secureField }
-        guard Self.isAccessibilityTrusted else { throw HormeFlowError.accessibilityDenied }
+        guard !target.isSecure else { throw VibeFlowError.secureField }
+        guard Self.isAccessibilityTrusted else { throw VibeFlowError.accessibilityDenied }
         guard let expectedPID = target.processIdentifier else {
-            throw HormeFlowError.insertionFailed
+            throw VibeFlowError.insertionFailed
         }
 
         let currentElement = Self.focusedElement()
@@ -58,9 +58,9 @@ public final class AccessibilityInsertionService: TextInserting, @unchecked Send
         } else {
             currentPID = NSWorkspace.shared.frontmostApplication?.processIdentifier ?? 0
         }
-        guard currentPID == expectedPID else { throw HormeFlowError.insertionFailed }
+        guard currentPID == expectedPID else { throw VibeFlowError.insertionFailed }
 
-        if Self.isSecure(currentElement) { throw HormeFlowError.secureField }
+        if Self.isSecure(currentElement) { throw VibeFlowError.secureField }
 
         // Web and Electron editors may replace their Accessibility node while
         // Whisper is running. Try both the original node and the currently
@@ -96,7 +96,7 @@ public final class AccessibilityInsertionService: TextInserting, @unchecked Send
         let snapshot = ClipboardSnapshot.capture(from: pasteboard)
         pasteboard.clearContents()
         guard pasteboard.setString(text, forType: .string) else {
-            throw HormeFlowError.insertionFailed
+            throw VibeFlowError.insertionFailed
         }
         let temporaryChangeCount = pasteboard.changeCount
 
@@ -104,7 +104,7 @@ public final class AccessibilityInsertionService: TextInserting, @unchecked Send
               let keyDown = CGEvent(keyboardEventSource: source, virtualKey: 9, keyDown: true),
               let keyUp = CGEvent(keyboardEventSource: source, virtualKey: 9, keyDown: false) else {
             snapshot.restore(to: pasteboard)
-            throw HormeFlowError.insertionFailed
+            throw VibeFlowError.insertionFailed
         }
         keyDown.flags = .maskCommand
         keyUp.flags = .maskCommand

@@ -15,7 +15,7 @@ public enum DictationPhase: String, Codable, CaseIterable, Sendable {
     }
 }
 
-public enum HormeFlowError: LocalizedError, Equatable, Sendable {
+public enum VibeFlowError: LocalizedError, Equatable, Sendable {
     case invalidTransition(from: DictationPhase, to: DictationPhase)
     case microphonePermissionDenied
     case microphoneUnavailable
@@ -37,7 +37,7 @@ public enum HormeFlowError: LocalizedError, Equatable, Sendable {
         case .modelInvalid: "The selected file is not a valid Whisper GGML model."
         case .transcriptionFailed: "Local transcription failed."
         case .accessibilityDenied: "Accessibility access is off. Your text is ready to copy."
-        case .secureField: "Horme Flow does not insert into secure text fields."
+        case .secureField: "VibeFlow does not insert into secure text fields."
         case .insertionFailed: "The focused app did not accept the text."
         }
     }

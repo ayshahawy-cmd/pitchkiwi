@@ -2,7 +2,7 @@
 
 ## Our standard
 
-We want Horme Flow to be a respectful, practical, and welcoming open-source project. Be considerate, critique ideas and code rather than people, respect privacy, and assume contributors have different levels of experience, language fluency, and access needs.
+We want VibeFlow to be a respectful, practical, and welcoming open-source project. Be considerate, critique ideas and code rather than people, respect privacy, and assume contributors have different levels of experience, language fluency, and access needs.
 
 Unacceptable behavior includes harassment, discrimination, threats, sexualized attention, deliberate intimidation, publishing someone else's private information, or repeatedly disrupting project work.
 

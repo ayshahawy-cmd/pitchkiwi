@@ -2,7 +2,7 @@
 
 ## 1. Visual intent
 
-Horme Flow should feel like a quiet instrument for thought: warm, precise, and native to the Mac. The supplied references demonstrate useful hierarchy—airy panels, restrained navigation, large readable metrics, and a compact recording surface—but the implementation must use original colors, layout, copy, iconography, and motion.
+VibeFlow should feel like a quiet instrument for thought: warm, precise, and native to the Mac. The supplied references demonstrate useful hierarchy—airy panels, restrained navigation, large readable metrics, and a compact recording surface—but the implementation must use original colors, layout, copy, iconography, and motion.
 
 Avoid a pixel-for-pixel reproduction of Wispr Flow. Do not use its logo, waveform mark, cream/teal palette, promotional banners, wording, or sidebar composition.
 
@@ -64,7 +64,7 @@ Use a native split view.
 Sidebar sections:
 
 ```text
-Horme Flow
+VibeFlow
   Home
   Dictionary
   Snippets
@@ -184,7 +184,7 @@ Use short factual language:
 - `This model is stored on your Mac (466 MB).`
 - `Nearby text is never read while Context is off.`
 
-Avoid absolute claims that the OS cannot guarantee, manipulative upgrade language, productivity comparisons, and anthropomorphic claims such as “Horme Flow learned you” unless the product truly implements that behavior.
+Avoid absolute claims that the OS cannot guarantee, manipulative upgrade language, productivity comparisons, and anthropomorphic claims such as “VibeFlow learned you” unless the product truly implements that behavior.
 
 ## 10. Accessibility checklist
 

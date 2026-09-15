@@ -1,6 +1,6 @@
 # Third-party notices
 
-Horme Flow ships or interoperates with the following open-source components. Keep this file with redistributed builds.
+VibeFlow ships or interoperates with the following open-source components. Keep this file with redistributed builds.
 
 ## whisper.cpp
 

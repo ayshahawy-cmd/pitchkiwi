@@ -19,7 +19,7 @@ public final class AVAudioCaptureService: AudioCapturing, @unchecked Sendable {
 
     public func start() async throws {
         let allowed = await requestMicrophoneAccess()
-        guard allowed else { throw HormeFlowError.microphonePermissionDenied }
+        guard allowed else { throw VibeFlowError.microphonePermissionDenied }
 
         lock.withLock {
             samples.removeAll(keepingCapacity: true)
@@ -29,7 +29,7 @@ public final class AVAudioCaptureService: AudioCapturing, @unchecked Sendable {
         let input = engine.inputNode
         let format = input.inputFormat(forBus: 0)
         guard format.sampleRate > 0, format.channelCount > 0 else {
-            throw HormeFlowError.microphoneUnavailable
+            throw VibeFlowError.microphoneUnavailable
         }
         nativeSampleRate = format.sampleRate
         let maximumFrames = Int(format.sampleRate * 300)
@@ -58,12 +58,12 @@ public final class AVAudioCaptureService: AudioCapturing, @unchecked Sendable {
         } catch {
             input.removeTap(onBus: 0)
             clear()
-            throw HormeFlowError.microphoneUnavailable
+            throw VibeFlowError.microphoneUnavailable
         }
     }
 
     public func stop() async throws -> CapturedAudio {
-        guard running else { throw HormeFlowError.microphoneUnavailable }
+        guard running else { throw VibeFlowError.microphoneUnavailable }
         engine.inputNode.removeTap(onBus: 0)
         engine.stop()
         running = false

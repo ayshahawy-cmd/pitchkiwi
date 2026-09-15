@@ -21,15 +21,15 @@ public enum ModelManager {
     }
 
     public static func importModel(from source: URL) throws -> URL {
-        guard source.pathExtension.lowercased() == "bin" else { throw HormeFlowError.modelInvalid }
+        guard source.pathExtension.lowercased() == "bin" else { throw VibeFlowError.modelInvalid }
         let attributes = try FileManager.default.attributesOfItem(atPath: source.path)
         let bytes = attributes[.size] as? NSNumber
-        guard bytes?.int64Value ?? 0 > 1_000_000 else { throw HormeFlowError.modelInvalid }
+        guard bytes?.int64Value ?? 0 > 1_000_000 else { throw VibeFlowError.modelInvalid }
 
         let handle = try FileHandle(forReadingFrom: source)
         defer { try? handle.close() }
         let magic = try handle.read(upToCount: 4) ?? Data()
-        guard magic == Data([0x6c, 0x6d, 0x67, 0x67]) else { throw HormeFlowError.modelInvalid }
+        guard magic == Data([0x6c, 0x6d, 0x67, 0x67]) else { throw VibeFlowError.modelInvalid }
 
         let directory = appSupportDirectory().appendingPathComponent("Models", isDirectory: true)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
@@ -56,8 +56,8 @@ public enum ModelManager {
 
     public static func appSupportDirectory() -> URL {
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-        let current = base.appendingPathComponent("Horme Flow", isDirectory: true)
-        let legacy = base.appendingPathComponent("VibeFlow", isDirectory: true)
+        let current = base.appendingPathComponent("VibeFlow", isDirectory: true)
+        let legacy = base.appendingPathComponent("Horme Flow", isDirectory: true)
         if !FileManager.default.fileExists(atPath: current.path),
            FileManager.default.fileExists(atPath: legacy.path) {
             try? FileManager.default.moveItem(at: legacy, to: current)

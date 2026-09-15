@@ -1,7 +1,7 @@
 import AppKit
 import Combine
 import SwiftUI
-import HormeFlowCore
+import VibeFlowCore
 
 @MainActor
 final class HUDPanelController {
@@ -110,7 +110,7 @@ private struct HUDView: View {
         case .transcribing, .refining: "Nothing leaves this Mac"
         case .inserting: "Never submits or presses Return"
         case .result: model.lastTranscript.isEmpty ? "Done" : "Saved as last transcript"
-        case .error: "Open Horme Flow for recovery"
+        case .error: "Open VibeFlow for recovery"
         case .cancelling: "Discarding audio"
         case .idle: "Local and ready"
         }

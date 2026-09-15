@@ -1,5 +1,5 @@
 import XCTest
-@testable import HormeFlowCore
+@testable import VibeFlowCore
 
 @MainActor
 final class LocalStoreTests: XCTestCase {
@@ -12,7 +12,7 @@ final class LocalStoreTests: XCTestCase {
         store.record(text: "PRIVATE-CANARY-TRANSCRIPT", duration: 2, fixes: 1)
         XCTAssertTrue(store.transcripts.isEmpty)
 
-        let data = try Data(contentsOf: directory.appendingPathComponent("horme-flow.json"))
+        let data = try Data(contentsOf: directory.appendingPathComponent("vibeflow.json"))
         XCTAssertNil(String(data: data, encoding: .utf8)?.range(of: "PRIVATE-CANARY-TRANSCRIPT"))
     }
 }

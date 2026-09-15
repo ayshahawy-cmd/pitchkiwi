@@ -3,12 +3,12 @@
 import PackageDescription
 
 let package = Package(
-    name: "HormeFlow",
+    name: "VibeFlow",
     platforms: [.macOS(.v14)],
     products: [
-        .library(name: "HormeFlowCore", targets: ["HormeFlowCore"]),
-        .executable(name: "HormeFlow", targets: ["HormeFlowApp"]),
-        .executable(name: "horme-flow-smoke", targets: ["HormeFlowSmoke"]),
+        .library(name: "VibeFlowCore", targets: ["VibeFlowCore"]),
+        .executable(name: "VibeFlow", targets: ["VibeFlowApp"]),
+        .executable(name: "vibeflow-smoke", targets: ["VibeFlowSmoke"]),
     ],
     targets: [
         .binaryTarget(
@@ -16,9 +16,9 @@ let package = Package(
             path: ".vendor/whisper.xcframework"
         ),
         .target(
-            name: "HormeFlowCore",
+            name: "VibeFlowCore",
             dependencies: ["whisper"],
-            path: "Sources/HormeFlowCore",
+            path: "Sources/VibeFlowCore",
             linkerSettings: [
                 .linkedFramework("AVFoundation"),
                 .linkedFramework("ApplicationServices"),
@@ -27,20 +27,20 @@ let package = Package(
             ]
         ),
         .executableTarget(
-            name: "HormeFlowApp",
-            dependencies: ["HormeFlowCore"],
-            path: "Sources/HormeFlowApp",
+            name: "VibeFlowApp",
+            dependencies: ["VibeFlowCore"],
+            path: "Sources/VibeFlowApp",
             resources: [.process("Resources")]
         ),
         .executableTarget(
-            name: "HormeFlowSmoke",
-            dependencies: ["HormeFlowCore"],
-            path: "Sources/HormeFlowSmoke"
+            name: "VibeFlowSmoke",
+            dependencies: ["VibeFlowCore"],
+            path: "Sources/VibeFlowSmoke"
         ),
         .testTarget(
-            name: "HormeFlowCoreTests",
-            dependencies: ["HormeFlowCore"],
-            path: "Tests/HormeFlowCoreTests"
+            name: "VibeFlowCoreTests",
+            dependencies: ["VibeFlowCore"],
+            path: "Tests/VibeFlowCoreTests"
         ),
     ]
 )

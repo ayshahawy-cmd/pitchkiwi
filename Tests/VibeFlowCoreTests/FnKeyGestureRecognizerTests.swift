@@ -1,5 +1,5 @@
 import XCTest
-@testable import HormeFlowCore
+@testable import VibeFlowCore
 
 final class FnKeyGestureRecognizerTests: XCTestCase {
     func testHoldStartsAndReleaseStopsImmediately() {

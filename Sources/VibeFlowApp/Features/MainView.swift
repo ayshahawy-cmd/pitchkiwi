@@ -1,6 +1,6 @@
 import AppKit
 import SwiftUI
-import HormeFlowCore
+import VibeFlowCore
 
 private enum Destination: String, CaseIterable, Identifiable {
     case home = "Home"
@@ -57,7 +57,7 @@ struct MainView: View {
             .navigationSplitViewColumnWidth(min: 210, ideal: 230)
         } detail: {
             ZStack {
-                HormeBackdrop()
+                VibeBackdrop()
                 Group {
                     switch selection ?? .home {
                     case .home: HomeView(model: model)
@@ -87,7 +87,7 @@ private struct BrandHeader: View {
                     .foregroundStyle(.black)
             }
             VStack(alignment: .leading, spacing: 0) {
-                Text("Horme Flow").font(.headline)
+                Text("VibeFlow").font(.headline)
                 Text("LOCAL DICTATION")
                     .font(.system(size: 8, weight: .bold, design: .monospaced))
                     .foregroundStyle(.secondary)
@@ -115,7 +115,7 @@ private struct PrivacyBadge: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)
-        .hormeGlass(cornerRadius: 14)
+        .vibeGlass(cornerRadius: 14)
     }
 }
 
@@ -128,7 +128,7 @@ private struct HomeView: View {
                 PageHeader(
                     eyebrow: "SPEAK AT THE SPEED OF THOUGHT",
                     title: "Your voice, directly into your work.",
-                    subtitle: "Hold the fn/Globe key anywhere on your Mac, or double-press it for hands-free dictation. Horme Flow transcribes locally and never submits."
+                    subtitle: "Hold the fn/Globe key anywhere on your Mac, or double-press it for hands-free dictation. VibeFlow transcribes locally and never submits."
                 )
 
                 HStack(spacing: 14) {
@@ -214,7 +214,7 @@ private struct StatusCard: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .hormeGlass(cornerRadius: 16)
+        .vibeGlass(cornerRadius: 16)
     }
 }
 
@@ -229,7 +229,7 @@ private struct KeyCap: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
-        .hormeGlass(cornerRadius: 11)
+        .vibeGlass(cornerRadius: 11)
     }
 }
 
@@ -341,7 +341,7 @@ private struct StylesView: View {
                     Toggle("Developer formatting", isOn: $store.developerMode)
                 }
 
-                SettingCard(icon: "terminal", title: "Terminal safety", description: "Horme Flow inserts text only. It never synthesizes Return or executes the command.") {
+                SettingCard(icon: "terminal", title: "Terminal safety", description: "VibeFlow inserts text only. It never synthesizes Return or executes the command.") {
                     Label("Always on", systemImage: "checkmark.shield.fill").foregroundStyle(.green)
                 }
 
@@ -399,7 +399,7 @@ private struct TransformCard: View {
         }
         .padding(18)
         .frame(maxWidth: .infinity, minHeight: 170, alignment: .leading)
-        .hormeGlass(cornerRadius: 18, interactive: true)
+        .vibeGlass(cornerRadius: 18, interactive: true)
     }
 }
 
@@ -418,7 +418,7 @@ private struct InsightsView: View {
                 GroupBox {
                     VStack(alignment: .leading, spacing: 14) {
                         Text("Privacy-respecting by design").font(.headline)
-                        Text("Horme Flow records aggregate counts, not app titles, document names, audio, or dictated text when History is off.")
+                        Text("VibeFlow records aggregate counts, not app titles, document names, audio, or dictated text when History is off.")
                             .foregroundStyle(.secondary)
                         Button("Reset metrics", role: .destructive) { store.resetMetrics() }
                     }
@@ -445,7 +445,7 @@ private struct MetricCard: View {
         }
         .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .hormeGlass(cornerRadius: 18)
+        .vibeGlass(cornerRadius: 18)
     }
 }
 
@@ -476,7 +476,7 @@ private struct SettingsView: View {
                     Button("Import .bin…") { model.importModel() }
                 }
 
-                SettingCard(icon: "cursorarrow.click.2", title: "Accessibility", description: model.accessibilityAuthorized ? "Granted. Horme Flow can insert at your cursor." : "Required to insert into other apps. Click Grant access, enable Horme Flow, then return here.") {
+                SettingCard(icon: "cursorarrow.click.2", title: "Accessibility", description: model.accessibilityAuthorized ? "Granted. VibeFlow can insert at your cursor." : "Required to insert into other apps. Click Grant access, enable VibeFlow, then return here.") {
                     Button(model.accessibilityAuthorized ? "Granted" : "Grant access") { model.requestAccessibility() }
                         .disabled(model.accessibilityAuthorized)
                 }
@@ -552,11 +552,11 @@ private struct SettingCard<Accessory: View>: View {
             accessory()
         }
         .padding(18)
-        .hormeGlass(cornerRadius: 16)
+        .vibeGlass(cornerRadius: 16)
     }
 }
 
-private struct HormeBackdrop: View {
+private struct VibeBackdrop: View {
     var body: some View {
         ZStack {
             Color(nsColor: .windowBackgroundColor)
@@ -582,7 +582,7 @@ private struct HormeBackdrop: View {
 
 private extension View {
     @ViewBuilder
-    func hormeGlass(cornerRadius: CGFloat, interactive: Bool = false) -> some View {
+    func vibeGlass(cornerRadius: CGFloat, interactive: Bool = false) -> some View {
         if #available(macOS 26.0, *) {
             if interactive {
                 glassEffect(.regular.tint(.white.opacity(0.035)).interactive(), in: .rect(cornerRadius: cornerRadius))
