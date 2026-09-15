@@ -20,15 +20,26 @@ public final class AccessibilityInsertionService: TextInserting, @unchecked Send
     }
 
     public func captureTarget() async -> InsertionTarget {
+        let frontmostApplication = NSWorkspace.shared.frontmostApplication
         guard Self.isAccessibilityTrusted else {
-            return InsertionTarget(processIdentifier: NSWorkspace.shared.frontmostApplication?.processIdentifier, element: nil, isSecure: false)
+            return InsertionTarget(
+                processIdentifier: frontmostApplication?.processIdentifier,
+                element: nil,
+                isSecure: false,
+                applicationBundleIdentifier: frontmostApplication?.bundleIdentifier
+            )
         }
 
         let system = AXUIElementCreateSystemWide()
         var value: CFTypeRef?
         guard AXUIElementCopyAttributeValue(system, kAXFocusedUIElementAttribute as CFString, &value) == .success,
               let value else {
-            return InsertionTarget(processIdentifier: NSWorkspace.shared.frontmostApplication?.processIdentifier, element: nil, isSecure: false)
+            return InsertionTarget(
+                processIdentifier: frontmostApplication?.processIdentifier,
+                element: nil,
+                isSecure: false,
+                applicationBundleIdentifier: frontmostApplication?.bundleIdentifier
+            )
         }
 
         let element = value as! AXUIElement
@@ -40,7 +51,8 @@ public final class AccessibilityInsertionService: TextInserting, @unchecked Send
         return InsertionTarget(
             processIdentifier: pid,
             element: element,
-            isSecure: role == "AXSecureTextField"
+            isSecure: role == "AXSecureTextField",
+            applicationBundleIdentifier: NSRunningApplication(processIdentifier: pid)?.bundleIdentifier
         )
     }
 
@@ -62,6 +74,17 @@ public final class AccessibilityInsertionService: TextInserting, @unchecked Send
 
         if Self.isSecure(currentElement) { throw PitchKiwiError.secureField }
 
+        // Chromium and Electron editors can return AX success without changing
+        // their document. Use the guarded paste path for those apps instead of
+        // accepting that false positive. The paste is addressed to the captured
+        // process and never includes Return/Enter.
+        if InsertionStrategyPolicy.prefersGuardedPaste(
+            bundleIdentifier: target.applicationBundleIdentifier
+        ) {
+            try await pasteWithRestoration(text, targetPID: expectedPID)
+            return
+        }
+
         // Web and Electron editors may replace their Accessibility node while
         // Whisper is running. Try both the original node and the currently
         // focused node, without reading either control's contents.
@@ -71,7 +94,7 @@ public final class AccessibilityInsertionService: TextInserting, @unchecked Send
             }
         }
 
-        try await pasteWithRestoration(text)
+        try await pasteWithRestoration(text, targetPID: expectedPID)
     }
 
     private static func focusedElement() -> AXUIElement? {
@@ -91,7 +114,7 @@ public final class AccessibilityInsertionService: TextInserting, @unchecked Send
         return (roleValue as? String) == "AXSecureTextField"
     }
 
-    private func pasteWithRestoration(_ text: String) async throws {
+    private func pasteWithRestoration(_ text: String, targetPID: pid_t) async throws {
         let pasteboard = NSPasteboard.general
         let snapshot = ClipboardSnapshot.capture(from: pasteboard)
         pasteboard.clearContents()
@@ -110,9 +133,9 @@ public final class AccessibilityInsertionService: TextInserting, @unchecked Send
         keyUp.flags = .maskCommand
         do {
             try await Task.sleep(for: .milliseconds(24))
-            keyDown.post(tap: .cghidEventTap)
+            keyDown.postToPid(targetPID)
             try await Task.sleep(for: .milliseconds(18))
-            keyUp.post(tap: .cghidEventTap)
+            keyUp.postToPid(targetPID)
 
             // Chromium/Electron editors can consume synthetic paste events on
             // a later run-loop turn. Keep the lease alive before restoration.
@@ -126,6 +149,35 @@ public final class AccessibilityInsertionService: TextInserting, @unchecked Send
         if pasteboard.changeCount == temporaryChangeCount {
             snapshot.restore(to: pasteboard)
         }
+    }
+}
+
+enum InsertionStrategyPolicy {
+    static func prefersGuardedPaste(bundleIdentifier: String?) -> Bool {
+        guard let identifier = bundleIdentifier?.lowercased(), !identifier.isEmpty else {
+            return false
+        }
+
+        let exactIdentifiers: Set<String> = [
+            "com.openai.codex",
+            "com.anthropic.claudefordesktop",
+            "com.microsoft.vscode",
+            "company.thebrowser.browser",
+            "org.mozilla.firefox",
+        ]
+        if exactIdentifiers.contains(identifier) { return true }
+
+        let webOrElectronPrefixes = [
+            "com.google.chrome",
+            "com.microsoft.edgemac",
+            "com.apple.safari",
+            "com.brave.browser",
+            "com.electron.",
+            "com.todesktop.",
+        ]
+        return webOrElectronPrefixes.contains { identifier.hasPrefix($0) }
+            || identifier.contains("cursor")
+            || identifier.contains("windsurf")
     }
 }
 

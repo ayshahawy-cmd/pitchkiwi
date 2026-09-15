@@ -203,8 +203,8 @@ No level captures screenshots, browser history, the pasteboard, hidden windows, 
 
 Preferred strategy order:
 
-1. Accessibility selected-text replacement when the target exposes a writable text range.
-2. Guarded pasteboard lease followed by Command-V.
+1. Accessibility selected-text replacement when a native target exposes a writable text range.
+2. Guarded pasteboard lease followed by Command-V for web/Electron editors that can falsely acknowledge direct Accessibility writes, or as the native fallback.
 3. In-app result card; do not force insertion.
 
 `ClipboardLease` snapshots all pasteboard items and change count, writes the temporary text, pastes, then restores only if no third party changed the clipboard after the temporary write. If another app changed it, preserve the newer clipboard and notify the user that restoration was skipped. Serialize leases process-wide.

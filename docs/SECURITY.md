@@ -57,7 +57,7 @@ Controls:
 
 Controls:
 
-- prefer direct Accessibility replacement;
+- prefer direct Accessibility replacement for reliable native controls, and guarded paste for web/Electron controls that can falsely acknowledge direct writes;
 - serialize fallback paste operations;
 - preserve every pasteboard representation, not text alone;
 - mark temporary values transient/concealed where the platform supports it;

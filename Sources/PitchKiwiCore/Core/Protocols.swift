@@ -31,10 +31,17 @@ public struct InsertionTarget: @unchecked Sendable {
     public let processIdentifier: pid_t?
     public let element: AXUIElement?
     public let isSecure: Bool
+    public let applicationBundleIdentifier: String?
 
-    public init(processIdentifier: pid_t?, element: AXUIElement?, isSecure: Bool) {
+    public init(
+        processIdentifier: pid_t?,
+        element: AXUIElement?,
+        isSecure: Bool,
+        applicationBundleIdentifier: String? = nil
+    ) {
         self.processIdentifier = processIdentifier
         self.element = element
         self.isSecure = isSecure
+        self.applicationBundleIdentifier = applicationBundleIdentifier
     }
 }
