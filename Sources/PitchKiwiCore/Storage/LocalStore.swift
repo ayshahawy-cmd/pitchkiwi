@@ -10,20 +10,28 @@ public final class LocalStore: ObservableObject {
     @Published public var retention: HistoryRetention { didSet { prune(); save() } }
     @Published public var developerMode: Bool { didSet { save() } }
     @Published public var contextEnabled: Bool { didSet { save() } }
+    @Published public var dictationMode: DictationMode { didSet { save() } }
 
     private let fileURL: URL
     private var isLoading = true
+    private var dictionarySeedVersion: Int
 
     public init(directory: URL? = nil) {
         let root = directory ?? ModelManager.appSupportDirectory()
-        let newFile = root.appendingPathComponent("vibeflow.json")
-        let legacyFile = root.appendingPathComponent("horme-flow.json")
+        let newFile = root.appendingPathComponent("pitchkiwi.json")
+        let legacyFile = root.appendingPathComponent("vibeflow.json")
         if !FileManager.default.fileExists(atPath: newFile.path),
            FileManager.default.fileExists(atPath: legacyFile.path) {
             try? FileManager.default.moveItem(at: legacyFile, to: newFile)
         }
         fileURL = newFile
-        let decoded = Self.load(from: fileURL)
+        var decoded = Self.load(from: fileURL)
+        let needsDeveloperSeeds = decoded.dictionarySeedVersion < Payload.currentDictionarySeedVersion
+        if needsDeveloperSeeds {
+            let existing = Set(decoded.dictionary.map { $0.writtenForm.lowercased() })
+            decoded.dictionary.append(contentsOf: Payload.defaultDictionary.filter { !existing.contains($0.writtenForm.lowercased()) })
+            decoded.dictionarySeedVersion = Payload.currentDictionarySeedVersion
+        }
         dictionary = decoded.dictionary
         snippets = decoded.snippets
         transcripts = decoded.transcripts
@@ -31,8 +39,11 @@ public final class LocalStore: ObservableObject {
         retention = decoded.retention
         developerMode = decoded.developerMode
         contextEnabled = decoded.contextEnabled
+        dictationMode = decoded.dictationMode
+        dictionarySeedVersion = decoded.dictionarySeedVersion
         isLoading = false
         prune()
+        if needsDeveloperSeeds { save() }
     }
 
     public func addDictionary(spoken: String, written: String) {
@@ -57,12 +68,14 @@ public final class LocalStore: ObservableObject {
         snippets.removeAll { ids.contains($0.id) }
     }
 
-    public func record(text: String, duration: TimeInterval, fixes: Int) {
+    public func record(text: String, duration: TimeInterval, changes: [RefinementChange], mode: DictationMode) {
         let record = TranscriptRecord(text: text, duration: duration)
         metrics.totalWords += record.wordCount
         metrics.dictations += 1
         metrics.captureSeconds += duration
-        metrics.fixes += fixes
+        metrics.fixes += changes.count
+        metrics.developerFixes += changes.filter { $0.kind == .developerToken || $0.kind == .correction }.count
+        if mode == .prompt { metrics.prompts += 1 }
         if retention != .never {
             transcripts.insert(record, at: 0)
         }
@@ -93,11 +106,13 @@ public final class LocalStore: ObservableObject {
             metrics: metrics,
             retention: retention,
             developerMode: developerMode,
-            contextEnabled: contextEnabled
+            contextEnabled: contextEnabled,
+            dictationMode: dictationMode,
+            dictionarySeedVersion: dictionarySeedVersion
         )
         do {
             try FileManager.default.createDirectory(at: fileURL.deletingLastPathComponent(), withIntermediateDirectories: true)
-            let data = try JSONEncoder.vibeFlow.encode(payload)
+            let data = try JSONEncoder.pitchKiwi.encode(payload)
             try data.write(to: fileURL, options: [.atomic, .completeFileProtection])
             try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: fileURL.path)
         } catch {
@@ -107,7 +122,7 @@ public final class LocalStore: ObservableObject {
 
     private static func load(from url: URL) -> Payload {
         guard let data = try? Data(contentsOf: url),
-              let payload = try? JSONDecoder.vibeFlow.decode(Payload.self, from: data) else {
+              let payload = try? JSONDecoder.pitchKiwi.decode(Payload.self, from: data) else {
             return Payload()
         }
         return payload
@@ -115,20 +130,75 @@ public final class LocalStore: ObservableObject {
 }
 
 private struct Payload: Codable {
-    var dictionary: [DictionaryEntry] = [
+    static let currentDictionarySeedVersion = 1
+    static let defaultDictionary: [DictionaryEntry] = [
+        DictionaryEntry(spokenForm: "claude code", writtenForm: "Claude Code"),
+        DictionaryEntry(spokenForm: "cursor", writtenForm: "Cursor"),
+        DictionaryEntry(spokenForm: "codex", writtenForm: "Codex"),
+        DictionaryEntry(spokenForm: "wind surf", writtenForm: "Windsurf"),
+        DictionaryEntry(spokenForm: "vercel", writtenForm: "Vercel"),
         DictionaryEntry(spokenForm: "super base", writtenForm: "Supabase"),
         DictionaryEntry(spokenForm: "post gress sequel", writtenForm: "PostgreSQL"),
+        DictionaryEntry(spokenForm: "next j s", writtenForm: "Next.js"),
+        DictionaryEntry(spokenForm: "tailwind", writtenForm: "Tailwind"),
+        DictionaryEntry(spokenForm: "shad c n", writtenForm: "shadcn"),
+        DictionaryEntry(spokenForm: "use effect", writtenForm: "useEffect"),
+        DictionaryEntry(spokenForm: "local host", writtenForm: "localhost"),
     ]
+    var dictionary: [DictionaryEntry] = Self.defaultDictionary
     var snippets: [Snippet] = []
     var transcripts: [TranscriptRecord] = []
     var metrics = UsageMetrics()
     var retention: HistoryRetention = .never
     var developerMode = true
     var contextEnabled = false
+    var dictationMode: DictationMode = .dictate
+    var dictionarySeedVersion = Self.currentDictionarySeedVersion
+
+    private enum CodingKeys: String, CodingKey {
+        case dictionary, snippets, transcripts, metrics, retention, developerMode, contextEnabled, dictationMode, dictionarySeedVersion
+    }
+
+    init() {}
+
+    init(
+        dictionary: [DictionaryEntry],
+        snippets: [Snippet],
+        transcripts: [TranscriptRecord],
+        metrics: UsageMetrics,
+        retention: HistoryRetention,
+        developerMode: Bool,
+        contextEnabled: Bool,
+        dictationMode: DictationMode,
+        dictionarySeedVersion: Int
+    ) {
+        self.dictionary = dictionary
+        self.snippets = snippets
+        self.transcripts = transcripts
+        self.metrics = metrics
+        self.retention = retention
+        self.developerMode = developerMode
+        self.contextEnabled = contextEnabled
+        self.dictationMode = dictationMode
+        self.dictionarySeedVersion = dictionarySeedVersion
+    }
+
+    init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        dictionary = try values.decodeIfPresent([DictionaryEntry].self, forKey: .dictionary) ?? Self.defaultDictionary
+        snippets = try values.decodeIfPresent([Snippet].self, forKey: .snippets) ?? []
+        transcripts = try values.decodeIfPresent([TranscriptRecord].self, forKey: .transcripts) ?? []
+        metrics = try values.decodeIfPresent(UsageMetrics.self, forKey: .metrics) ?? UsageMetrics()
+        retention = try values.decodeIfPresent(HistoryRetention.self, forKey: .retention) ?? .never
+        developerMode = try values.decodeIfPresent(Bool.self, forKey: .developerMode) ?? true
+        contextEnabled = try values.decodeIfPresent(Bool.self, forKey: .contextEnabled) ?? false
+        dictationMode = try values.decodeIfPresent(DictationMode.self, forKey: .dictationMode) ?? .dictate
+        dictionarySeedVersion = try values.decodeIfPresent(Int.self, forKey: .dictionarySeedVersion) ?? 0
+    }
 }
 
 private extension JSONEncoder {
-    static var vibeFlow: JSONEncoder {
+    static var pitchKiwi: JSONEncoder {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
@@ -137,7 +207,7 @@ private extension JSONEncoder {
 }
 
 private extension JSONDecoder {
-    static var vibeFlow: JSONDecoder {
+    static var pitchKiwi: JSONDecoder {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         return decoder

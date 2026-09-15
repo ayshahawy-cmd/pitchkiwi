@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/readme-hero.svg" alt="VibeFlow — private voice-to-text for developers on macOS" width="100%">
+  <img src="docs/assets/readme-hero.svg" alt="PitchKiwi — private voice-to-text for developers on macOS" width="100%">
 </p>
 
 <p align="center">
@@ -15,16 +15,18 @@
   No account. No cloud transcription. No saved audio.
 </p>
 
-VibeFlow is a native, open-source macOS dictation app made for developers, vibe coders, and people who think in long prompts. It runs Whisper locally, cleans up developer language, and inserts the result into the editor, terminal, browser, or AI chat you were already using.
+PitchKiwi is a native, open-source macOS voice tool for developers, vibe coders, and people who think out loud. It runs Whisper locally, removes verbal clutter with deterministic rules, and can turn a rambling request into a structured prompt without sending it to another AI model.
 
 > [!NOTE]
-> VibeFlow is an original project inspired by the interaction pattern of modern dictation tools. It does not contain Wispr Flow source code, private APIs, branding, copy, or visual assets.
+> PitchKiwi is an original project inspired by the interaction pattern of modern dictation tools. It does not contain Wispr Flow source code, private APIs, branding, copy, or visual assets.
 
-## Why VibeFlow
+## Why PitchKiwi
 
-| | VibeFlow behavior |
+| | PitchKiwi behavior |
 | --- | --- |
 | **Fast capture** | Hold Fn for push-to-talk, or double-press Fn for hands-free dictation. |
+| **Prompt mode** | Organizes only what you said into Goal, Context, Requirements, and Done when. |
+| **Clean dictation** | Removes conservative filler, repeated words, and repeated multi-word phrases. |
 | **Developer aware** | Handles terms, casing commands, Markdown punctuation, snippets, and a personal dictionary. |
 | **Local by design** | Whisper inference and deterministic cleanup happen on your Mac. |
 | **Safe insertion** | Inserts text without pressing Return, submitting forms, or executing terminal commands. |
@@ -36,9 +38,9 @@ VibeFlow is a native, open-source macOS dictation app made for developers, vibe 
 ### From GitHub Releases
 
 1. Open the repository's [latest release](https://github.com/ayshahawy-cmd/vibeflow/releases/latest).
-2. Download `VibeFlow-macOS.zip` and unzip it.
-3. Move `VibeFlow.app` into your **Applications** folder.
-4. On the first launch, right-click VibeFlow and choose **Open**.
+2. Download `PitchKiwi-macOS.zip` and unzip it.
+3. Move `PitchKiwi.app` into your **Applications** folder.
+4. On the first launch, right-click PitchKiwi and choose **Open**.
 5. Follow the four-screen onboarding guide to grant Microphone and Accessibility access.
 
 Pre-1.0 community builds are ad-hoc signed. macOS may say it cannot verify the developer; right-clicking and choosing **Open** uses Apple's normal one-app approval flow. Do not disable Gatekeeper. A future public release should use Developer ID signing and notarization.
@@ -58,19 +60,24 @@ cd vibeflow
 ./scripts/bootstrap.sh
 swift test
 ./scripts/build-app.sh
-open ".build/VibeFlow.app"
+open ".build/PitchKiwi.app"
 ```
 
 The bootstrap script downloads checksum-pinned `whisper.cpp` artifacts and the `ggml-base.en` model. The model and generated app stay in ignored local directories and are not committed to Git.
 
 ## How to use it
 
+Choose an output mode on Home before speaking:
+
+- **✍️ Dictate** preserves your order and voice while cleaning obvious disfluencies and repetition.
+- **🥝 Prompt** applies the same cleanup, then sorts explicitly stated content into useful prompt sections. Empty sections are omitted; PitchKiwi does not invent requirements or answer the prompt.
+
 ### Push to talk
 
 1. Click a normal text field in any app.
 2. Hold the **Fn/Globe** key.
 3. Speak while the small waveform moves with your voice.
-4. Release Fn. VibeFlow transcribes, cleans up, and inserts the text.
+4. Release Fn. PitchKiwi transcribes, cleans up, optionally structures, and inserts the text.
 
 ### Hands-free
 
@@ -78,12 +85,12 @@ The bootstrap script downloads checksum-pinned `whisper.cpp` artifacts and the `
 2. Speak without holding the key.
 3. Press **Fn** once more to stop and insert.
 
-Press **Escape** while listening to cancel. VibeFlow never synthesizes Return/Enter, so dictated terminal commands and prompts are inserted but not executed or submitted.
+Press **Escape** while listening to cancel. PitchKiwi never synthesizes Return/Enter, so dictated terminal commands and prompts are inserted but not executed or submitted.
 
 > [!TIP]
-> If Fn opens Emoji & Symbols, changes your input source, or starts Apple Dictation, go to **System Settings → Keyboard** and set the Fn/Globe-key action to **Do Nothing**. VibeFlow can still observe Fn while Accessibility access is enabled.
+> If Fn opens Emoji & Symbols, changes your input source, or starts Apple Dictation, go to **System Settings → Keyboard** and set the Fn/Globe-key action to **Do Nothing**. PitchKiwi can still observe Fn while Accessibility access is enabled.
 
-The first transcription after launch may be slower while the model loads and Metal initializes. The current version performs transcription after you stop speaking; streaming partial results are on the roadmap.
+The first transcription after launch may be slower while the model loads and Metal initializes. The current version performs transcription after you stop speaking; streaming partial results are on the roadmap. For higher speech-recognition accuracy, you can import a larger compatible Whisper GGML model from Settings at the cost of more disk space and slower processing.
 
 ## First-launch onboarding
 
@@ -103,7 +110,7 @@ Completion is stored as one local macOS preference. It is not synced or sent any
 | **Microphone** | Captures speech only during visible dictation. | No wake word, background listening, or saved recordings. |
 | **Accessibility** | Observes the Fn gesture and inserts text at the focused cursor. | Nearby-text context remains separately disabled by default. |
 
-VibeFlow will not begin cross-app dictation if Accessibility access is missing. If insertion fails, the transcript remains available inside the app for copying.
+PitchKiwi will not begin cross-app dictation if Accessibility access is missing. If insertion fails, the transcript remains available inside the app for copying.
 
 ## Local storage and privacy
 
@@ -124,12 +131,12 @@ Focused text field
 | Microphone audio | Never saved | Memory only; discarded after transcription or cancellation |
 | Last transcript | Memory only | Cleared when the app quits or a new result replaces it |
 | Transcript history | Off | Optional, user-selected retention in the local JSON file |
-| Dictionary and snippets | Local | `~/Library/Application Support/VibeFlow/vibeflow.json` |
+| Dictionary and snippets | Local | `~/Library/Application Support/PitchKiwi/pitchkiwi.json` |
 | Usage counters | Local | Content-free totals in the same JSON file |
-| Whisper model | Local | Bundled in the app or imported under VibeFlow Application Support |
+| Whisper model | Local | Bundled in the app or imported under PitchKiwi Application Support |
 | Onboarding completion | Local | macOS application preferences |
 
-The JSON data file is written atomically with owner-only permissions. The app contains no account, analytics, advertising, cloud transcription, or sync integration. During the guarded paste fallback, other clipboard utilities may briefly observe the transcript; VibeFlow restores the previous clipboard when it can.
+The JSON data file is written atomically with owner-only permissions. The app contains no account, analytics, advertising, cloud transcription, or sync integration. During the guarded paste fallback, other clipboard utilities may briefly observe the transcript; PitchKiwi restores the previous clipboard when it can.
 
 Read the full [security and privacy design](docs/SECURITY.md) and the repository [vulnerability reporting policy](SECURITY.md). Public source code makes the implementation auditable, but it is not itself a security guarantee—review releases, checksums, permissions, and code changes before trusting sensitive dictation.
 
@@ -140,7 +147,7 @@ Read the full [security and privacy design](docs/SECURITY.md) and the repository
 | Application | Swift 6, SwiftUI, focused AppKit bridges |
 | Audio | AVFoundation / `AVAudioEngine`, 16 kHz mono PCM |
 | Speech recognition | `whisper.cpp`, local GGML model, Metal acceleration |
-| Cleanup | Deterministic Swift pipeline; no cloud LLM required |
+| Cleanup | Deterministic Swift pipeline for filler, phrase de-duplication, punctuation, and prompt structure |
 | Global controls | AppKit event monitoring with Fn gesture state machine |
 | Text insertion | macOS Accessibility APIs with guarded clipboard fallback |
 | Persistence | Codable JSON, atomic writes, file mode `0600` |
@@ -171,6 +178,7 @@ The core engine is protocol-driven so audio capture, transcription, refinement, 
 - [Prompt architecture](docs/PROMPT_ARCHITECTURE.md)
 - [Design system](docs/DESIGN_SYSTEM.md)
 - [Threat model](docs/SECURITY.md)
+- [Distribution and pricing](docs/DISTRIBUTION.md)
 
 ## Developer workflow
 
@@ -178,24 +186,24 @@ The core engine is protocol-driven so audio capture, transcription, refinement, 
 make bootstrap   # download and verify the framework + default model
 make build       # debug build
 make test        # run unit tests
-make app         # produce .build/VibeFlow.app
+make app         # produce .build/PitchKiwi.app
 make release     # produce the app ZIP and SHA-256 checksum
 ```
 
 Test the actual local model against an audio file:
 
 ```bash
-swift run vibeflow-smoke .models/ggml-base.en.bin /path/to/speech.wav
+swift run pitchkiwi-smoke .models/ggml-base.en.bin /path/to/speech.wav
 ```
 
-Release maintainers can run `make release`, then upload both `.build/VibeFlow-macOS.zip` and `.build/VibeFlow-macOS.zip.sha256` to a GitHub Release.
+Release maintainers can run `make release`, then upload both `.build/PitchKiwi-macOS.zip` and `.build/PitchKiwi-macOS.zip.sha256` to a GitHub Release.
 
 ## Repository map
 
 ```text
-Sources/VibeFlowApp/      native app, onboarding, screens, HUD, orchestration
-Sources/VibeFlowCore/     audio, Whisper, refinement, insertion, storage
-Sources/VibeFlowSmoke/    real-model command-line smoke test
+Sources/PitchKiwiApp/      native app, onboarding, screens, HUD, orchestration
+Sources/PitchKiwiCore/     audio, Whisper, refinement, insertion, storage
+Sources/PitchKiwiSmoke/    real-model command-line smoke test
 Tests/                    gesture, privacy, refinement, and state tests
 Assets/                   original application artwork
 Packaging/                macOS bundle metadata
@@ -207,4 +215,4 @@ docs/                     product, architecture, security, and UX specs
 
 Issues and focused pull requests are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md), preserve the privacy and non-submission invariants, and never commit recordings, real transcripts, model weights, signing secrets, or screenshots containing personal data.
 
-VibeFlow is available under the [MIT License](LICENSE). The name is provisional; complete a trademark and repository-name check before a broad release.
+PitchKiwi is available under the [MIT License](LICENSE). The name is provisional; complete a trademark and repository-name check before a broad release.

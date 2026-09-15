@@ -15,7 +15,21 @@ public enum DictationPhase: String, Codable, CaseIterable, Sendable {
     }
 }
 
-public enum VibeFlowError: LocalizedError, Equatable, Sendable {
+public enum DictationMode: String, Codable, CaseIterable, Sendable, Identifiable {
+    case dictate
+    case prompt
+
+    public var id: String { rawValue }
+
+    public var title: String {
+        switch self {
+        case .dictate: "Dictate"
+        case .prompt: "Prompt"
+        }
+    }
+}
+
+public enum PitchKiwiError: LocalizedError, Equatable, Sendable {
     case invalidTransition(from: DictationPhase, to: DictationPhase)
     case microphonePermissionDenied
     case microphoneUnavailable
@@ -37,7 +51,7 @@ public enum VibeFlowError: LocalizedError, Equatable, Sendable {
         case .modelInvalid: "The selected file is not a valid Whisper GGML model."
         case .transcriptionFailed: "Local transcription failed."
         case .accessibilityDenied: "Accessibility access is off. Your text is ready to copy."
-        case .secureField: "VibeFlow does not insert into secure text fields."
+        case .secureField: "PitchKiwi does not insert into secure text fields."
         case .insertionFailed: "The focused app did not accept the text."
         }
     }
@@ -71,6 +85,7 @@ public struct RefinementChange: Codable, Identifiable, Equatable, Sendable {
         case correction
         case snippet
         case developerToken
+        case promptStructure
     }
 
     public let id: UUID
@@ -175,8 +190,34 @@ public struct UsageMetrics: Codable, Equatable, Sendable {
     public var dictations = 0
     public var captureSeconds: TimeInterval = 0
     public var fixes = 0
+    public var prompts = 0
+    public var developerFixes = 0
 
     public init() {}
+
+    private enum CodingKeys: String, CodingKey {
+        case totalWords, dictations, captureSeconds, fixes, prompts, developerFixes
+    }
+
+    public init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        totalWords = try values.decodeIfPresent(Int.self, forKey: .totalWords) ?? 0
+        dictations = try values.decodeIfPresent(Int.self, forKey: .dictations) ?? 0
+        captureSeconds = try values.decodeIfPresent(TimeInterval.self, forKey: .captureSeconds) ?? 0
+        fixes = try values.decodeIfPresent(Int.self, forKey: .fixes) ?? 0
+        prompts = try values.decodeIfPresent(Int.self, forKey: .prompts) ?? 0
+        developerFixes = try values.decodeIfPresent(Int.self, forKey: .developerFixes) ?? 0
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var values = encoder.container(keyedBy: CodingKeys.self)
+        try values.encode(totalWords, forKey: .totalWords)
+        try values.encode(dictations, forKey: .dictations)
+        try values.encode(captureSeconds, forKey: .captureSeconds)
+        try values.encode(fixes, forKey: .fixes)
+        try values.encode(prompts, forKey: .prompts)
+        try values.encode(developerFixes, forKey: .developerFixes)
+    }
 
     public var wordsPerMinute: Int {
         guard captureSeconds > 0 else { return 0 }

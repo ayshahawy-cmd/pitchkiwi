@@ -1,14 +1,14 @@
 import AppKit
 import SwiftUI
-import VibeFlowCore
+import PitchKiwiCore
 
 @main
-struct VibeFlowApp: App {
+struct PitchKiwiApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var model = AppModel.shared
 
     var body: some Scene {
-        WindowGroup("VibeFlow", id: "main") {
+        WindowGroup("PitchKiwi", id: "main") {
             MainView(model: model)
                 .frame(minWidth: 900, minHeight: 620)
         }
@@ -33,8 +33,8 @@ struct VibeFlowApp: App {
         MenuBarExtra {
             MenuBarContent(model: model)
         } label: {
-            Image(systemName: model.phase == .listening ? "waveform.circle.fill" : "waveform.circle")
-                .accessibilityLabel(model.phase == .listening ? "VibeFlow is listening" : "VibeFlow")
+            Text("🥝")
+                .accessibilityLabel(model.phase == .listening ? "PitchKiwi is listening" : "PitchKiwi")
         }
         .menuBarExtraStyle(.menu)
     }
@@ -70,13 +70,14 @@ private struct MenuBarContent: View {
             model.toggleDictation()
         }
         Text(model.handsFreeMode ? "Hands-free • press fn to stop" : "Hold fn • double-press for hands-free")
+        Text("Mode: \(model.store.dictationMode.title)")
         Divider()
         Button("Copy Last Transcript") { model.copyLastTranscript() }
             .disabled(model.lastTranscript.isEmpty)
-        Button("Open VibeFlow") { model.showMainWindow() }
+        Button("Open PitchKiwi") { model.showMainWindow() }
         Divider()
         Text("Local • History \(model.store.retention == .never ? "off" : "on") • Context \(model.store.contextEnabled ? "on" : "off")")
         Divider()
-        Button("Quit VibeFlow") { NSApp.terminate(nil) }
+        Button("Quit PitchKiwi") { NSApp.terminate(nil) }
     }
 }

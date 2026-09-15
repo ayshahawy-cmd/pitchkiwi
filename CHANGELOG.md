@@ -16,10 +16,14 @@ All notable changes will be documented here. This project follows Keep a Changel
 - Local dictionary, snippets, developer formatting, scratchpad, insights, and retention controls.
 - Checksum-pinned bootstrap, signed app-bundle packaging, smoke-test CLI, and XCTest suite.
 - Fn/Globe-key push-to-talk and double-press hands-free dictation gestures.
-- Standardized the public product, bundle, executable, modules, and local storage as VibeFlow, with migration support for earlier development builds.
+- Standardized the public product, bundle, executable, modules, and local storage as PitchKiwi, with migration support for earlier development builds.
 - Added native Liquid Glass surfaces on macOS 26 with material fallbacks on macOS 14–15.
 - Replaced the recording HUD with a compact 168×42 live microphone-level waveform.
 - Added permission-first onboarding and stale-focus recovery for reliable browser and Electron text insertion.
 - Hardened the clipboard fallback with delayed event delivery and cancellation-safe restoration.
 - Added a one-time four-step onboarding experience for privacy, Fn controls, permissions, and first use.
 - Added original repository artwork, public setup documentation, and reproducible release archive packaging.
+- Renamed the product and native modules to PitchKiwi with migration from VibeFlow local data.
+- Added deterministic Dictate and Prompt modes, multi-word repetition removal, conversational warm-up cleanup, and prompt sectioning without a second model.
+- Added one-time developer dictionary seeds and private counters for prompts shaped and developer terms fixed.
+- Introduced a kiwi-inspired visual system, app icon, menu-bar emoji, and live HUD treatment.

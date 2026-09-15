@@ -13,7 +13,13 @@ public protocol SpeechTranscribing: Sendable {
 }
 
 public protocol TextRefining: Sendable {
-    func refine(text: String, dictionary: [DictionaryEntry], snippets: [Snippet], developerMode: Bool) -> RefinementResult
+    func refine(
+        text: String,
+        dictionary: [DictionaryEntry],
+        snippets: [Snippet],
+        developerMode: Bool,
+        mode: DictationMode
+    ) -> RefinementResult
 }
 
 public protocol TextInserting: Sendable {

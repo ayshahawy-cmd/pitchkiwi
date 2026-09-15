@@ -1,7 +1,7 @@
 import AppKit
 import Combine
 import SwiftUI
-import VibeFlowCore
+import PitchKiwiCore
 
 @MainActor
 final class HUDPanelController {
@@ -53,10 +53,8 @@ private struct HUDView: View {
         Group {
             if model.phase == .listening {
                 HStack(spacing: 9) {
-                    Circle()
-                        .fill(Color(red: 0.72, green: 0.98, blue: 0.30))
-                        .frame(width: 6, height: 6)
-                        .shadow(color: Color(red: 0.72, green: 0.98, blue: 0.30).opacity(0.75), radius: 4)
+                    Text("🥝")
+                        .font(.system(size: 12))
                     LiveWaveform(level: model.audioLevel)
                     Spacer(minLength: 0)
                     Image(systemName: model.handsFreeMode ? "lock.fill" : "globe")
@@ -98,9 +96,9 @@ private struct HUDView: View {
 
     private var iconColor: Color {
         switch model.phase {
-        case .listening: Color(red: 0.35, green: 0.83, blue: 0.72)
+        case .listening: Color(red: 0.58, green: 0.78, blue: 0.12)
         case .error: Color(red: 0.94, green: 0.42, blue: 0.42)
-        default: Color(red: 0.66, green: 0.65, blue: 1)
+        default: Color(red: 0.58, green: 0.78, blue: 0.12)
         }
     }
 
@@ -110,7 +108,7 @@ private struct HUDView: View {
         case .transcribing, .refining: "Nothing leaves this Mac"
         case .inserting: "Never submits or presses Return"
         case .result: model.lastTranscript.isEmpty ? "Done" : "Saved as last transcript"
-        case .error: "Open VibeFlow for recovery"
+        case .error: "Open PitchKiwi for recovery"
         case .cancelling: "Discarding audio"
         case .idle: "Local and ready"
         }
@@ -127,7 +125,7 @@ private struct LiveWaveform: View {
         HStack(spacing: 3) {
             ForEach(weights.indices, id: \.self) { index in
                 Capsule(style: .continuous)
-                    .fill(Color.primary.opacity(0.82))
+                    .fill(Color(red: 0.58, green: 0.78, blue: 0.12).opacity(0.92))
                     .frame(width: 3, height: barHeight(at: index))
             }
         }

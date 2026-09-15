@@ -3,12 +3,12 @@
 import PackageDescription
 
 let package = Package(
-    name: "VibeFlow",
+    name: "PitchKiwi",
     platforms: [.macOS(.v14)],
     products: [
-        .library(name: "VibeFlowCore", targets: ["VibeFlowCore"]),
-        .executable(name: "VibeFlow", targets: ["VibeFlowApp"]),
-        .executable(name: "vibeflow-smoke", targets: ["VibeFlowSmoke"]),
+        .library(name: "PitchKiwiCore", targets: ["PitchKiwiCore"]),
+        .executable(name: "PitchKiwi", targets: ["PitchKiwiApp"]),
+        .executable(name: "pitchkiwi-smoke", targets: ["PitchKiwiSmoke"]),
     ],
     targets: [
         .binaryTarget(
@@ -16,9 +16,9 @@ let package = Package(
             path: ".vendor/whisper.xcframework"
         ),
         .target(
-            name: "VibeFlowCore",
+            name: "PitchKiwiCore",
             dependencies: ["whisper"],
-            path: "Sources/VibeFlowCore",
+            path: "Sources/PitchKiwiCore",
             linkerSettings: [
                 .linkedFramework("AVFoundation"),
                 .linkedFramework("ApplicationServices"),
@@ -27,20 +27,20 @@ let package = Package(
             ]
         ),
         .executableTarget(
-            name: "VibeFlowApp",
-            dependencies: ["VibeFlowCore"],
-            path: "Sources/VibeFlowApp",
+            name: "PitchKiwiApp",
+            dependencies: ["PitchKiwiCore"],
+            path: "Sources/PitchKiwiApp",
             resources: [.process("Resources")]
         ),
         .executableTarget(
-            name: "VibeFlowSmoke",
-            dependencies: ["VibeFlowCore"],
-            path: "Sources/VibeFlowSmoke"
+            name: "PitchKiwiSmoke",
+            dependencies: ["PitchKiwiCore"],
+            path: "Sources/PitchKiwiSmoke"
         ),
         .testTarget(
-            name: "VibeFlowCoreTests",
-            dependencies: ["VibeFlowCore"],
-            path: "Tests/VibeFlowCoreTests"
+            name: "PitchKiwiCoreTests",
+            dependencies: ["PitchKiwiCore"],
+            path: "Tests/PitchKiwiCoreTests"
         ),
     ]
 )

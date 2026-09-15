@@ -2,7 +2,7 @@ import AppKit
 import AVFoundation
 import Combine
 import Foundation
-import VibeFlowCore
+import PitchKiwiCore
 
 @MainActor
 final class AppModel: ObservableObject {
@@ -110,7 +110,13 @@ final class AppModel: ObservableObject {
 
     func makePromptFromLast() {
         guard !lastTranscript.isEmpty else { return }
-        scratchpad = "## Objective\n\n\(lastTranscript)"
+        scratchpad = refiner.refine(
+            text: lastTranscript,
+            dictionary: store.dictionary,
+            snippets: store.snippets,
+            developerMode: store.developerMode,
+            mode: .prompt
+        ).text
         showMainWindow()
     }
 
@@ -190,7 +196,7 @@ final class AppModel: ObservableObject {
             let captured = try await audio.stop()
             audioIsCapturing = false
             stopLevelMonitoring()
-            guard let modelURL else { throw VibeFlowError.modelMissing }
+            guard let modelURL else { throw PitchKiwiError.modelMissing }
 
             let hints = store.dictionary.filter(\.isEnabled).map(\.writtenForm)
             let raw = try await transcriber.transcribe(captured, modelURL: modelURL, hints: hints)
@@ -201,10 +207,11 @@ final class AppModel: ObservableObject {
                 text: raw.text,
                 dictionary: store.dictionary,
                 snippets: store.snippets,
-                developerMode: store.developerMode
+                developerMode: store.developerMode,
+                mode: store.dictationMode
             )
             lastTranscript = refined.text
-            store.record(text: refined.text, duration: captured.duration, fixes: refined.changes.count)
+            store.record(text: refined.text, duration: captured.duration, changes: refined.changes, mode: store.dictationMode)
 
             try await move(to: .inserting)
             statusText = "Inserting"

@@ -1,5 +1,5 @@
 import XCTest
-@testable import VibeFlowCore
+@testable import PitchKiwiCore
 
 final class StateMachineTests: XCTestCase {
     func testHappyPath() async throws {
@@ -19,7 +19,7 @@ final class StateMachineTests: XCTestCase {
         do {
             try await machine.transition(to: .inserting)
             XCTFail("Expected transition to fail")
-        } catch let error as VibeFlowError {
+        } catch let error as PitchKiwiError {
             XCTAssertEqual(error, .invalidTransition(from: .idle, to: .inserting))
         } catch {
             XCTFail("Unexpected error")

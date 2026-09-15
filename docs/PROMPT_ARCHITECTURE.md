@@ -18,12 +18,13 @@ Pure Swift transformations handle predictable operations:
 - spoken developer symbols and formatting commands;
 - identifier and filename resolution;
 - app-mode formatting.
+- cue-based Prompt mode sectioning into Goal, Context, Requirements, and Done when.
 
 This layer is fast, testable, and is the fallback for every failure in Layer B.
 
 ### Layer B: optional local rewrite (explicit)
 
-A local instruction model can power Polish, Prompt Builder, and custom transforms. It is disabled until the user imports a supported local model. It never receives audio and receives context only under the user's current context policy.
+A future local instruction model may power richer Polish and custom transforms. It is disabled unless the user deliberately imports a supported model. The shipping Prompt mode does not require this layer: it uses deterministic cue classification, never receives context, and never invents missing sections.
 
 ## 3. Prompt assembly
 
@@ -84,10 +85,11 @@ a warning.
 ### Prompt Builder
 
 - Convert rough speech into a prompt for another AI or coding agent.
-- Organize only present information under useful headings: Objective, Context, Requirements, Constraints, Acceptance criteria, Open questions.
+- Organize only present information under: Goal, Context, Requirements, Done when.
 - Omit empty headings.
 - Preserve first-person intent and all concrete references.
 - Do not solve the task or invent acceptance criteria.
+- The current implementation recognizes explicit cues such as “for context,” “make sure,” and “done when.” Content without an explicit non-goal cue remains in Goal rather than being guessed into another section.
 
 ### Terminal Literal
 
@@ -239,4 +241,3 @@ Metrics:
 - human preference for clarity, measured separately from safety gates.
 
 Any prompt/model change must run the full corpus and record the model digest, prompt contract version, and result diff.
-

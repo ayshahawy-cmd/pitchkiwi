@@ -7,7 +7,8 @@ public struct DeterministicRefiner: TextRefining {
         text input: String,
         dictionary: [DictionaryEntry],
         snippets: [Snippet],
-        developerMode: Bool
+        developerMode: Bool,
+        mode: DictationMode
     ) -> RefinementResult {
         var text = input.trimmingCharacters(in: .whitespacesAndNewlines)
         var changes: [RefinementChange] = []
@@ -22,7 +23,7 @@ public struct DeterministicRefiner: TextRefining {
             return RefinementResult(text: snippet.expansion, changes: [.init(kind: .snippet)])
         }
 
-        let withoutFillers = replace(text, pattern: #"(?i)(?<![\p{L}\p{N}_])(um+|uh+|erm)(?![\p{L}\p{N}_])[,]?\s*"#, with: "")
+        let withoutFillers = removeFillers(from: text)
         if withoutFillers != text {
             text = withoutFillers
             changes.append(.init(kind: .filler))
@@ -47,7 +48,8 @@ public struct DeterministicRefiner: TextRefining {
 
         // Run de-duplication after spoken developer tokens are converted. This
         // preserves intentional pairs such as “dash dash” -> “--”.
-        let withoutRepeats = replace(text, pattern: #"(?i)\b([\p{L}\p{N}_'-]+)(?:\s+\1\b)+"#, with: "$1")
+        let withoutRepeatedPhrases = collapseRepeatedPhrases(in: text)
+        let withoutRepeats = replace(withoutRepeatedPhrases, pattern: #"(?i)\b([\p{L}\p{N}_'-]+)(?:[\s,]+\1\b)+"#, with: "$1")
         if withoutRepeats != text {
             text = withoutRepeats
             changes.append(.init(kind: .repetition))
@@ -59,7 +61,109 @@ public struct DeterministicRefiner: TextRefining {
             changes.append(.init(kind: .punctuation))
         }
 
+        if mode == .prompt {
+            let structured = structurePrompt(text)
+            if structured != text {
+                text = structured
+                changes.append(.init(kind: .promptStructure))
+            }
+        }
+
         return RefinementResult(text: text, changes: changes)
+    }
+
+    private func removeFillers(from input: String) -> String {
+        var text = replace(
+            input,
+            pattern: #"(?i)(?<![\p{L}\p{N}_])(um+|uh+|erm+|hmm+|mm[ -]?hmm|you know)(?![\p{L}\p{N}_])[,;:]?\s*"#,
+            with: ""
+        )
+        // These words are removed only as a leading warm-up cluster. “Like”
+        // elsewhere remains untouched because it may express comparison.
+        text = replace(text, pattern: #"(?i)^(?:(?:yeah|okay|ok|so|like)\b[, ]*)+"#, with: "")
+        return text
+    }
+
+    private func collapseRepeatedPhrases(in input: String) -> String {
+        var text = input
+        let pattern = #"(?i)\b((?:[\p{L}\p{N}_'-]+\s+){1,5}[\p{L}\p{N}_'-]+)(?:[\s,]+\1\b)+"#
+        for _ in 0..<4 {
+            let updated = replace(text, pattern: pattern, with: "$1")
+            guard updated != text else { break }
+            text = updated
+        }
+        return text
+    }
+
+    private enum PromptSection: CaseIterable {
+        case goal
+        case context
+        case requirements
+        case doneWhen
+
+        var title: String {
+            switch self {
+            case .goal: "Goal"
+            case .context: "Context"
+            case .requirements: "Requirements"
+            case .doneWhen: "Done when"
+            }
+        }
+    }
+
+    private func structurePrompt(_ input: String) -> String {
+        var prepared = replace(
+            input,
+            pattern: #"(?i)\s+(?=(?:for context|context(?:\s+is|:)|make sure|requirements?(?:\s+are|\s+include|:)|done when|success means|acceptance criteria)\b)"#,
+            with: "\n"
+        )
+        prepared = replace(prepared, pattern: #"([.!?]+)(?:\s+|$)"#, with: "$1\n")
+
+        var buckets: [PromptSection: [String]] = [:]
+        for rawClause in prepared.components(separatedBy: .newlines) {
+            var clause = rawClause.trimmingCharacters(in: .whitespacesAndNewlines)
+            clause = replace(clause, pattern: #"(?i)^(?:and|but|so)\s+"#, with: "")
+            guard !clause.isEmpty else { continue }
+
+            let lowered = clause.lowercased()
+            let section: PromptSection
+            if lowered.range(of: #"^(done when|success means|acceptance criteria)\b"#, options: .regularExpression) != nil {
+                section = .doneWhen
+                clause = stripPromptPrefix(from: clause, pattern: #"(?i)^(?:done when|success means|acceptance criteria(?: are|:)?)(?:\s+|:\s*)"#)
+            } else if lowered.range(of: #"^(for context|context\b|currently\b|right now\b|because\b)"#, options: .regularExpression) != nil {
+                section = .context
+                clause = stripPromptPrefix(from: clause, pattern: #"(?i)^(?:for context|context(?: is|:)?)(?:\s+|:\s*)"#)
+            } else if lowered.range(of: #"\b(make sure|requirements?\b|must\b|need(?:s)? to\b|should\b|do not\b|don't\b|without\b)"#, options: .regularExpression) != nil {
+                section = .requirements
+                clause = stripPromptPrefix(from: clause, pattern: #"(?i)^(?:make sure(?: that)?|requirements?(?: are| include|:)?)(?:\s+|:\s*)"#)
+            } else {
+                section = .goal
+                clause = stripPromptPrefix(from: clause, pattern: #"(?i)^(?:goal(?: is|:)?|objective(?: is|:)?|i want (?:you )?to|can you|please)(?:\s+|:\s*)"#)
+            }
+
+            clause = clause.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !clause.isEmpty else { continue }
+            if let first = clause.first, first.isLetter, first.isLowercase {
+                clause.replaceSubrange(clause.startIndex...clause.startIndex, with: String(first).uppercased())
+            }
+            buckets[section, default: []].append(clause)
+        }
+
+        let rendered = PromptSection.allCases.compactMap { section -> String? in
+            guard let clauses = buckets[section], !clauses.isEmpty else { return nil }
+            let body: String
+            if section == .requirements || section == .doneWhen {
+                body = clauses.map { "- \($0)" }.joined(separator: "\n")
+            } else {
+                body = clauses.joined(separator: " ")
+            }
+            return "\(section.title):\n\(body)"
+        }
+        return rendered.isEmpty ? input : rendered.joined(separator: "\n\n")
+    }
+
+    private func stripPromptPrefix(from input: String, pattern: String) -> String {
+        replace(input, pattern: pattern, with: "")
     }
 
     private func exactSnippet(for text: String, snippets: [Snippet]) -> Snippet? {

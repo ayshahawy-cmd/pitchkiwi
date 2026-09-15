@@ -1,6 +1,6 @@
 import AppKit
 import SwiftUI
-import VibeFlowCore
+import PitchKiwiCore
 
 private enum Destination: String, CaseIterable, Identifiable {
     case home = "Home"
@@ -28,7 +28,7 @@ private enum Destination: String, CaseIterable, Identifiable {
 
 struct MainView: View {
     @ObservedObject var model: AppModel
-    @AppStorage("onboardingCompletedV1") private var onboardingCompleted = false
+    @AppStorage("pitchKiwiOnboardingCompletedV1") private var onboardingCompleted = false
     @State private var selection: Destination? = .home
     @State private var showOnboarding = false
 
@@ -59,7 +59,7 @@ struct MainView: View {
             .navigationSplitViewColumnWidth(min: 210, ideal: 230)
         } detail: {
             ZStack {
-                VibeBackdrop()
+                KiwiBackdrop()
                 Group {
                     switch selection ?? .home {
                     case .home: HomeView(model: model)
@@ -73,7 +73,7 @@ struct MainView: View {
                 }
             }
         }
-        .tint(Color(red: 0.48, green: 0.68, blue: 0.10))
+        .tint(KiwiPalette.accent)
         .task {
             if !onboardingCompleted {
                 showOnboarding = true
@@ -98,7 +98,7 @@ private struct OnboardingView: View {
 
     var body: some View {
         ZStack {
-            VibeBackdrop()
+            KiwiBackdrop()
 
             VStack(spacing: 0) {
                 HStack {
@@ -108,7 +108,7 @@ private struct OnboardingView: View {
                     HStack(spacing: 7) {
                         ForEach(0..<steps, id: \.self) { index in
                             Capsule(style: .continuous)
-                                .fill(index == step ? VibePalette.accent : Color.primary.opacity(0.12))
+                                .fill(index == step ? KiwiPalette.accent : Color.primary.opacity(0.12))
                                 .frame(width: index == step ? 26 : 8, height: 8)
                                 .animation(.snappy(duration: 0.24), value: step)
                         }
@@ -138,7 +138,7 @@ private struct OnboardingView: View {
 
                     Spacer()
 
-                    Button(step == steps - 1 ? "Start using VibeFlow" : "Continue") {
+                    Button(step == steps - 1 ? "Start using PitchKiwi" : "Continue") {
                         if step == steps - 1 {
                             onComplete()
                         } else {
@@ -153,15 +153,15 @@ private struct OnboardingView: View {
             }
         }
         .frame(width: 760, height: 540)
-        .tint(VibePalette.accent)
+        .tint(KiwiPalette.accent)
     }
 
     private var welcomeStep: some View {
         OnboardingPage(
-            icon: "waveform",
-            eyebrow: "WELCOME TO VIBEFLOW",
-            title: "Your voice stays yours.",
-            message: "Speak directly into editors, terminals, browsers, and AI chats. Audio is processed by Whisper on this Mac, discarded after transcription, and never uploaded."
+            icon: "leaf.fill",
+            eyebrow: "WELCOME TO PITCHKIWI",
+            title: "Meet your prompt kiwi. 🥝",
+            message: "Rambling in, useful words out. Whisper and Prompt mode run on this Mac, audio is discarded after transcription, and your voice is never uploaded."
         ) {
             HStack(spacing: 12) {
                 PromisePill(icon: "lock.fill", text: "No account")
@@ -175,8 +175,8 @@ private struct OnboardingView: View {
         OnboardingPage(
             icon: "keyboard",
             eyebrow: "ONE KEY, TWO MODES",
-            title: "Hold, speak, release.",
-            message: "Use the Fn/Globe key from any normal text field. VibeFlow places the finished transcript at the cursor without pressing Return or submitting anything."
+            title: "Hold, speak, release. Easy. 🥝",
+            message: "Use the Fn/Globe key from any normal text field. PitchKiwi places the finished transcript at the cursor without pressing Return or submitting anything."
         ) {
             HStack(spacing: 14) {
                 GestureCard(keys: ["fn"], title: "Push to talk", detail: "Hold while speaking · release to insert")
@@ -190,7 +190,7 @@ private struct OnboardingView: View {
             icon: "hand.raised.fill",
             eyebrow: "MAC PERMISSIONS",
             title: "Two permissions. Nothing more.",
-            message: "Microphone lets VibeFlow hear you. Accessibility lets it detect Fn and insert text into the app you were already using."
+            message: "Microphone lets PitchKiwi hear you. Accessibility lets it detect Fn and insert text into the app you were already using."
         ) {
             VStack(spacing: 10) {
                 PermissionRow(
@@ -218,8 +218,8 @@ private struct OnboardingView: View {
         OnboardingPage(
             icon: "checkmark",
             eyebrow: "YOU'RE READY",
-            title: "Try your first prompt.",
-            message: "Open your coding tool or AI chat, click into its text box, hold Fn, and say the prompt below. Release Fn and VibeFlow will insert it for you."
+            title: "Pitch your first prompt.",
+            message: "Choose Prompt mode, open your coding tool or AI chat, hold Fn, and ramble naturally. PitchKiwi will remove verbal clutter and organize only what you actually said."
         ) {
             VStack(alignment: .leading, spacing: 10) {
                 Text("Try saying")
@@ -234,7 +234,7 @@ private struct OnboardingView: View {
             }
             .padding(18)
             .frame(maxWidth: 560)
-            .vibeGlass(cornerRadius: 16)
+            .kiwiGlass(cornerRadius: 16)
         }
     }
 }
@@ -250,21 +250,21 @@ private struct OnboardingPage<Content: View>: View {
         VStack(spacing: 20) {
             ZStack {
                 Circle()
-                    .fill(VibePalette.accent.opacity(0.18))
+                    .fill(KiwiPalette.accent.opacity(0.18))
                     .frame(width: 86, height: 86)
                 Circle()
-                    .stroke(VibePalette.accent.opacity(0.32), lineWidth: 1)
+                    .stroke(KiwiPalette.accent.opacity(0.32), lineWidth: 1)
                     .frame(width: 86, height: 86)
                 Image(systemName: icon)
                     .font(.system(size: 34, weight: .semibold))
-                    .foregroundStyle(VibePalette.accent)
+                    .foregroundStyle(KiwiPalette.accent)
             }
 
             VStack(spacing: 8) {
                 Text(eyebrow)
                     .font(.system(size: 10, weight: .bold, design: .monospaced))
                     .tracking(1.5)
-                    .foregroundStyle(VibePalette.accent)
+                    .foregroundStyle(KiwiPalette.accent)
                 Text(title)
                     .font(.system(size: 34, weight: .semibold, design: .rounded))
                 Text(message)
@@ -290,7 +290,7 @@ private struct PromisePill: View {
             .font(.callout.weight(.medium))
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
-            .vibeGlass(cornerRadius: 999)
+            .kiwiGlass(cornerRadius: 999)
     }
 }
 
@@ -314,7 +314,7 @@ private struct GestureCard: View {
         }
         .padding(16)
         .frame(width: 265, alignment: .leading)
-        .vibeGlass(cornerRadius: 16)
+        .kiwiGlass(cornerRadius: 16)
     }
 }
 
@@ -330,7 +330,7 @@ private struct PermissionRow: View {
         HStack(spacing: 14) {
             Image(systemName: icon)
                 .font(.title3)
-                .foregroundStyle(VibePalette.accent)
+                .foregroundStyle(KiwiPalette.accent)
                 .frame(width: 28)
             VStack(alignment: .leading, spacing: 2) {
                 Text(title).font(.headline)
@@ -347,12 +347,15 @@ private struct PermissionRow: View {
             }
         }
         .padding(14)
-        .vibeGlass(cornerRadius: 14)
+        .kiwiGlass(cornerRadius: 14)
     }
 }
 
-private enum VibePalette {
-    static let accent = Color(red: 0.48, green: 0.68, blue: 0.10)
+private enum KiwiPalette {
+    static let accent = Color(red: 0.46, green: 0.66, blue: 0.08)
+    static let flesh = Color(red: 0.74, green: 0.92, blue: 0.28)
+    static let skin = Color(red: 0.42, green: 0.27, blue: 0.12)
+    static let cream = Color(red: 0.96, green: 0.94, blue: 0.84)
 }
 
 private struct BrandHeader: View {
@@ -360,15 +363,14 @@ private struct BrandHeader: View {
         HStack(spacing: 10) {
             ZStack {
                 RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .fill(Color(red: 0.73, green: 0.96, blue: 0.26))
+                    .fill(KiwiPalette.flesh)
                     .frame(width: 34, height: 34)
-                Image(systemName: "waveform")
-                    .font(.system(size: 15, weight: .bold))
-                    .foregroundStyle(.black)
+                Text("🥝")
+                    .font(.system(size: 21))
             }
             VStack(alignment: .leading, spacing: 0) {
-                Text("VibeFlow").font(.headline)
-                Text("LOCAL DICTATION")
+                Text("PitchKiwi").font(.headline)
+                Text("LOCAL PROMPT VOICE")
                     .font(.system(size: 8, weight: .bold, design: .monospaced))
                     .foregroundStyle(.secondary)
                     .tracking(1.2)
@@ -385,7 +387,7 @@ private struct PrivacyBadge: View {
         VStack(alignment: .leading, spacing: 6) {
             Label("LOCAL MODE", systemImage: "lock.fill")
                 .font(.system(size: 10, weight: .bold, design: .monospaced))
-                .foregroundStyle(Color(red: 0.48, green: 0.68, blue: 0.10))
+                .foregroundStyle(KiwiPalette.accent)
             Text("History \(store.retention == .never ? "off" : "on") · Context \(store.contextEnabled ? "on" : "off")")
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -395,25 +397,33 @@ private struct PrivacyBadge: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)
-        .vibeGlass(cornerRadius: 14)
+        .kiwiGlass(cornerRadius: 14)
     }
 }
 
 private struct HomeView: View {
     @ObservedObject var model: AppModel
+    @ObservedObject private var store: LocalStore
+
+    init(model: AppModel) {
+        self.model = model
+        store = model.store
+    }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 22) {
                 PageHeader(
-                    eyebrow: "SPEAK AT THE SPEED OF THOUGHT",
-                    title: "Your voice, directly into your work.",
-                    subtitle: "Hold the fn/Globe key anywhere on your Mac, or double-press it for hands-free dictation. VibeFlow transcribes locally and never submits."
+                    eyebrow: "🥝 RAMBLE IN. CLEAR PROMPT OUT.",
+                    title: "Turn a messy thought into something your agent can act on.",
+                    subtitle: store.dictationMode == .prompt
+                        ? "Prompt mode removes verbal clutter and sorts only what you said into Goal, Context, Requirements, and Done when—without a second AI model."
+                        : "Dictate mode preserves your order and voice while removing obvious filler, repeated words, and repeated phrases."
                 )
 
                 HStack(spacing: 14) {
                     StatusCard(title: "Microphone", value: model.microphoneAuthorized ? "Ready" : "Needs access", icon: "mic.fill", ready: model.microphoneAuthorized)
-                    StatusCard(title: "Whisper model", value: model.modelReady ? "base.en ready" : "Import model", icon: "cpu", ready: model.modelReady)
+                    StatusCard(title: "Whisper model", value: model.modelURL?.lastPathComponent ?? "Import model", icon: "cpu", ready: model.modelReady)
                     StatusCard(title: "Insertion", value: model.accessibilityAuthorized ? "Ready" : "Needs access", icon: "cursorarrow.click.2", ready: model.accessibilityAuthorized)
                 }
 
@@ -427,16 +437,27 @@ private struct HomeView: View {
                 }
 
                 HStack(spacing: 16) {
+                    Picker("Output mode", selection: $store.dictationMode) {
+                        Text("✍️ Dictate").tag(DictationMode.dictate)
+                        Text("🥝 Prompt").tag(DictationMode.prompt)
+                    }
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+                    .frame(width: 230)
+
                     Button {
                         model.toggleDictation()
                     } label: {
-                        Label(model.phase == .listening ? "Stop dictation" : "Start dictation", systemImage: model.phase == .listening ? "stop.fill" : "mic.fill")
+                        Label(
+                            model.phase == .listening ? "Stop listening" : (store.dictationMode == .prompt ? "Start prompt" : "Start dictation"),
+                            systemImage: model.phase == .listening ? "stop.fill" : "mic.fill"
+                        )
                             .font(.headline)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 10)
                     }
                     .buttonStyle(.borderedProminent)
-                    .tint(Color(red: 0.42, green: 0.61, blue: 0.08))
+                    .tint(KiwiPalette.accent)
 
                     KeyCap(text: "fn", detail: "hold · double-press hands-free")
                 }
@@ -494,7 +515,7 @@ private struct StatusCard: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .vibeGlass(cornerRadius: 16)
+        .kiwiGlass(cornerRadius: 16)
     }
 }
 
@@ -509,7 +530,7 @@ private struct KeyCap: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
-        .vibeGlass(cornerRadius: 11)
+        .kiwiGlass(cornerRadius: 11)
     }
 }
 
@@ -615,18 +636,22 @@ private struct StylesView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                PageHeader(eyebrow: "HOW YOUR WORDS LAND", title: "Styles", subtitle: "The first release keeps automatic rewriting conservative and deterministic.")
+                PageHeader(eyebrow: "HOW YOUR WORDS LAND", title: "Styles", subtitle: "Both modes are deterministic, inspectable, and local—no second AI model required.")
 
                 SettingCard(icon: "chevron.left.forwardslash.chevron.right", title: "Code & prompts", description: "Preserve Markdown and translate spoken developer notation such as dot env, dash dash force, and casing commands.") {
                     Toggle("Developer formatting", isOn: $store.developerMode)
                 }
 
-                SettingCard(icon: "terminal", title: "Terminal safety", description: "VibeFlow inserts text only. It never synthesizes Return or executes the command.") {
+                SettingCard(icon: "terminal", title: "Terminal safety", description: "PitchKiwi inserts text only. It never synthesizes Return or executes the command.") {
                     Label("Always on", systemImage: "checkmark.shield.fill").foregroundStyle(.green)
                 }
 
-                SettingCard(icon: "text.alignleft", title: "Clean dictation", description: "Remove obvious filler and repetition, normalize punctuation, and preserve uncertainty and intent.") {
-                    Text("Conservative").foregroundStyle(.secondary)
+                SettingCard(icon: "text.alignleft", title: "Clean dictation", description: "Remove verbal warm-ups, filler, repeated words, and repeated phrases while preserving uncertainty and intent.") {
+                    Text("Always on").foregroundStyle(.secondary)
+                }
+
+                SettingCard(icon: "list.bullet.rectangle", title: "Prompt structure", description: "Sort explicitly stated content into Goal, Context, Requirements, and Done when. Empty sections are omitted and nothing is invented.") {
+                    Label("Local rules", systemImage: "checkmark.seal.fill").foregroundStyle(KiwiPalette.accent)
                 }
             }
             .padding(34)
@@ -646,7 +671,7 @@ private struct TransformsView: View {
                 TransformCard(icon: "wand.and.stars", title: "Polish", description: "Run conservative cleanup again and open the result in the scratchpad.") {
                     model.putLastInScratchpad()
                 }
-                TransformCard(icon: "curlybraces.square", title: "Prompt Builder", description: "Place the dictated request under a clear Objective heading for further editing.") {
+                TransformCard(icon: "curlybraces.square", title: "Prompt Builder", description: "Organize the last result into only the sections it actually contains—without sending it to another model.") {
                     model.makePromptFromLast()
                 }
             }
@@ -679,7 +704,7 @@ private struct TransformCard: View {
         }
         .padding(18)
         .frame(maxWidth: .infinity, minHeight: 170, alignment: .leading)
-        .vibeGlass(cornerRadius: 18, interactive: true)
+        .kiwiGlass(cornerRadius: 18, interactive: true)
     }
 }
 
@@ -691,14 +716,14 @@ private struct InsightsView: View {
             VStack(alignment: .leading, spacing: 22) {
                 PageHeader(eyebrow: "ON-DEVICE COUNTERS", title: "Insights", subtitle: "Only totals and timings are stored. No transcript content is needed for these metrics.")
                 HStack(spacing: 14) {
-                    MetricCard(value: "\(store.metrics.wordsPerMinute)", label: "WORDS PER MINUTE", icon: "speedometer")
-                    MetricCard(value: "\(store.metrics.fixes)", label: "LOCAL FIXES", icon: "wand.and.rays")
-                    MetricCard(value: "\(store.metrics.totalWords)", label: "WORDS DICTATED", icon: "text.word.spacing")
+                    MetricCard(value: "\(store.metrics.prompts)", label: "PROMPTS SHAPED", icon: "list.bullet.rectangle")
+                    MetricCard(value: "\(store.metrics.developerFixes)", label: "DEV TERMS FIXED", icon: "chevron.left.forwardslash.chevron.right")
+                    MetricCard(value: "\(store.metrics.dictations)", label: "KIWI SESSIONS", icon: "leaf.fill")
                 }
                 GroupBox {
                     VStack(alignment: .leading, spacing: 14) {
                         Text("Privacy-respecting by design").font(.headline)
-                        Text("VibeFlow records aggregate counts, not app titles, document names, audio, or dictated text when History is off.")
+                        Text("PitchKiwi records aggregate counts, not app titles, document names, audio, or dictated text when History is off.")
                             .foregroundStyle(.secondary)
                         Button("Reset metrics", role: .destructive) { store.resetMetrics() }
                     }
@@ -719,13 +744,13 @@ private struct MetricCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Image(systemName: icon).font(.title3).foregroundStyle(Color(red: 0.48, green: 0.68, blue: 0.10))
+            Image(systemName: icon).font(.title3).foregroundStyle(KiwiPalette.accent)
             Text(value).font(.system(size: 34, weight: .semibold, design: .rounded))
             Text(label).font(.system(size: 10, weight: .bold, design: .monospaced)).foregroundStyle(.secondary).tracking(0.8)
         }
         .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .vibeGlass(cornerRadius: 18)
+        .kiwiGlass(cornerRadius: 18)
     }
 }
 
@@ -752,11 +777,11 @@ private struct SettingsView: View {
                         .background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
                 }
 
-                SettingCard(icon: "cpu", title: "Whisper model", description: model.modelURL?.lastPathComponent ?? "No local model found") {
+                SettingCard(icon: "cpu", title: "Whisper model", description: model.modelURL.map { "\($0.lastPathComponent) · base.en is fast; larger compatible .en models improve recognition but use more memory and time." } ?? "No local model found") {
                     Button("Import .bin…") { model.importModel() }
                 }
 
-                SettingCard(icon: "cursorarrow.click.2", title: "Accessibility", description: model.accessibilityAuthorized ? "Granted. VibeFlow can insert at your cursor." : "Required to insert into other apps. Click Grant access, enable VibeFlow, then return here.") {
+                SettingCard(icon: "cursorarrow.click.2", title: "Accessibility", description: model.accessibilityAuthorized ? "Granted. PitchKiwi can insert at your cursor." : "Required to insert into other apps. Click Grant access, enable PitchKiwi, then return here.") {
                     Button(model.accessibilityAuthorized ? "Granted" : "Grant access") { model.requestAccessibility() }
                         .disabled(model.accessibilityAuthorized)
                 }
@@ -800,7 +825,7 @@ private struct PageHeader: View {
         VStack(alignment: .leading, spacing: 8) {
             Text(eyebrow)
                 .font(.system(size: 10, weight: .bold, design: .monospaced))
-                .foregroundStyle(Color(red: 0.48, green: 0.68, blue: 0.10))
+                .foregroundStyle(KiwiPalette.accent)
                 .tracking(1.4)
             Text(title)
                 .font(.system(size: 32, weight: .semibold, design: .rounded))
@@ -823,7 +848,7 @@ private struct SettingCard<Accessory: View>: View {
             Image(systemName: icon)
                 .font(.title3)
                 .frame(width: 28)
-                .foregroundStyle(Color(red: 0.48, green: 0.68, blue: 0.10))
+                .foregroundStyle(KiwiPalette.accent)
             VStack(alignment: .leading, spacing: 4) {
                 Text(title).font(.headline)
                 Text(description).font(.callout).foregroundStyle(.secondary)
@@ -832,25 +857,25 @@ private struct SettingCard<Accessory: View>: View {
             accessory()
         }
         .padding(18)
-        .vibeGlass(cornerRadius: 16)
+        .kiwiGlass(cornerRadius: 16)
     }
 }
 
-private struct VibeBackdrop: View {
+private struct KiwiBackdrop: View {
     var body: some View {
         ZStack {
             Color(nsColor: .windowBackgroundColor)
             LinearGradient(
                 colors: [
-                    Color(red: 0.72, green: 0.98, blue: 0.30).opacity(0.10),
-                    Color(red: 0.38, green: 0.71, blue: 0.65).opacity(0.06),
+                    KiwiPalette.flesh.opacity(0.14),
+                    KiwiPalette.cream.opacity(0.07),
                     .clear,
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
             Circle()
-                .fill(Color(red: 0.60, green: 0.52, blue: 1).opacity(0.07))
+                .fill(KiwiPalette.skin.opacity(0.08))
                 .frame(width: 420, height: 420)
                 .blur(radius: 90)
                 .offset(x: 310, y: 250)
@@ -862,7 +887,7 @@ private struct VibeBackdrop: View {
 
 private extension View {
     @ViewBuilder
-    func vibeGlass(cornerRadius: CGFloat, interactive: Bool = false) -> some View {
+    func kiwiGlass(cornerRadius: CGFloat, interactive: Bool = false) -> some View {
         if #available(macOS 26.0, *) {
             if interactive {
                 glassEffect(.regular.tint(.white.opacity(0.035)).interactive(), in: .rect(cornerRadius: cornerRadius))

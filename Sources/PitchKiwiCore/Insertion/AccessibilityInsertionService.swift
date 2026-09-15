@@ -45,10 +45,10 @@ public final class AccessibilityInsertionService: TextInserting, @unchecked Send
     }
 
     public func insert(_ text: String, into target: InsertionTarget) async throws {
-        guard !target.isSecure else { throw VibeFlowError.secureField }
-        guard Self.isAccessibilityTrusted else { throw VibeFlowError.accessibilityDenied }
+        guard !target.isSecure else { throw PitchKiwiError.secureField }
+        guard Self.isAccessibilityTrusted else { throw PitchKiwiError.accessibilityDenied }
         guard let expectedPID = target.processIdentifier else {
-            throw VibeFlowError.insertionFailed
+            throw PitchKiwiError.insertionFailed
         }
 
         let currentElement = Self.focusedElement()
@@ -58,9 +58,9 @@ public final class AccessibilityInsertionService: TextInserting, @unchecked Send
         } else {
             currentPID = NSWorkspace.shared.frontmostApplication?.processIdentifier ?? 0
         }
-        guard currentPID == expectedPID else { throw VibeFlowError.insertionFailed }
+        guard currentPID == expectedPID else { throw PitchKiwiError.insertionFailed }
 
-        if Self.isSecure(currentElement) { throw VibeFlowError.secureField }
+        if Self.isSecure(currentElement) { throw PitchKiwiError.secureField }
 
         // Web and Electron editors may replace their Accessibility node while
         // Whisper is running. Try both the original node and the currently
@@ -96,7 +96,7 @@ public final class AccessibilityInsertionService: TextInserting, @unchecked Send
         let snapshot = ClipboardSnapshot.capture(from: pasteboard)
         pasteboard.clearContents()
         guard pasteboard.setString(text, forType: .string) else {
-            throw VibeFlowError.insertionFailed
+            throw PitchKiwiError.insertionFailed
         }
         let temporaryChangeCount = pasteboard.changeCount
 
@@ -104,7 +104,7 @@ public final class AccessibilityInsertionService: TextInserting, @unchecked Send
               let keyDown = CGEvent(keyboardEventSource: source, virtualKey: 9, keyDown: true),
               let keyUp = CGEvent(keyboardEventSource: source, virtualKey: 9, keyDown: false) else {
             snapshot.restore(to: pasteboard)
-            throw VibeFlowError.insertionFailed
+            throw PitchKiwiError.insertionFailed
         }
         keyDown.flags = .maskCommand
         keyUp.flags = .maskCommand

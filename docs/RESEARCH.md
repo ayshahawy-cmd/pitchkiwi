@@ -66,5 +66,5 @@ The architecture here is an independent recommendation based on the required beh
 
 ## Product differences by design
 
-VibeFlow should omit cloud sync, accounts, teams, mobile, meeting recording, subscriptions, referrals, and cloud-based learning. It should add stricter local context bounds, terminal-safe insertion, offline verification, history-off default, model checksum transparency, and a public threat model.
+PitchKiwi should omit cloud sync, accounts, teams, mobile, meeting recording, subscriptions, referrals, and cloud-based learning. It should add stricter local context bounds, terminal-safe insertion, offline verification, history-off default, model checksum transparency, and a public threat model.
 

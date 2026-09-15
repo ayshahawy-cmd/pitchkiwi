@@ -2,7 +2,7 @@
 
 ## 1. Product definition
 
-VibeFlow is a local-first macOS dictation utility optimized for long prompts and developer language. It converts speech to text on-device, applies bounded local cleanup, and inserts the result into the active application.
+PitchKiwi is a local-first macOS dictation utility optimized for long prompts and developer language. It converts speech to text on-device, applies bounded local cleanup, and inserts the result into the active application.
 
 The v1 success metric is not feature count. It is trustable repetition: a user should be comfortable invoking it dozens of times per day without wondering whether recording started, whether private speech left the machine, whether their clipboard was damaged, or whether a terminal command was executed.
 
@@ -76,9 +76,9 @@ Needs to dictate PR descriptions, release notes, ADRs, issues, and status update
 ### Menu bar
 
 - Start/stop dictation
-- Pause VibeFlow
+- Pause PitchKiwi
 - Paste Last Transcript
-- Open VibeFlow
+- Open PitchKiwi
 - Privacy status: `Local • History off • Context off`
 - Quit
 

@@ -1,5 +1,5 @@
 import XCTest
-@testable import VibeFlowCore
+@testable import PitchKiwiCore
 
 final class FnKeyGestureRecognizerTests: XCTestCase {
     func testHoldStartsAndReleaseStopsImmediately() {

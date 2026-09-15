@@ -9,14 +9,14 @@ public actor WhisperTranscriber: SpeechTranscribing {
 
     public func transcribe(_ audio: CapturedAudio, modelURL: URL, hints: [String]) async throws -> RawTranscript {
         guard audio.sampleRate == 16_000, !audio.samples.isEmpty else {
-            throw VibeFlowError.noSpeech
+            throw PitchKiwiError.noSpeech
         }
 
         let energy = sqrt(audio.samples.reduce(0) { $0 + ($1 * $1) } / Float(audio.samples.count))
-        guard energy > 0.0015 else { throw VibeFlowError.noSpeech }
+        guard energy > 0.0015 else { throw PitchKiwiError.noSpeech }
 
         try loadModelIfNeeded(modelURL)
-        guard let context = contextBox?.pointer else { throw VibeFlowError.modelMissing }
+        guard let context = contextBox?.pointer else { throw PitchKiwiError.modelMissing }
 
         var params = whisper_full_default_params(WHISPER_SAMPLING_GREEDY)
         params.n_threads = Int32(min(8, max(2, ProcessInfo.processInfo.activeProcessorCount - 2)))
@@ -42,7 +42,7 @@ public actor WhisperTranscriber: SpeechTranscribing {
                 }
             }
         }
-        guard result == 0 else { throw VibeFlowError.transcriptionFailed }
+        guard result == 0 else { throw PitchKiwiError.transcriptionFailed }
 
         let count = whisper_full_n_segments(context)
         var text = ""
@@ -52,7 +52,7 @@ public actor WhisperTranscriber: SpeechTranscribing {
             }
         }
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { throw VibeFlowError.noSpeech }
+        guard !trimmed.isEmpty else { throw PitchKiwiError.noSpeech }
         return RawTranscript(text: trimmed)
     }
 
@@ -62,14 +62,14 @@ public actor WhisperTranscriber: SpeechTranscribing {
         contextBox = nil
 
         guard FileManager.default.fileExists(atPath: path) else {
-            throw VibeFlowError.modelMissing
+            throw PitchKiwiError.modelMissing
         }
 
         var parameters = whisper_context_default_params()
         parameters.use_gpu = true
         parameters.flash_attn = true
         let loaded = path.withCString { whisper_init_from_file_with_params($0, parameters) }
-        guard let loaded else { throw VibeFlowError.modelInvalid }
+        guard let loaded else { throw PitchKiwiError.modelInvalid }
         contextBox = WhisperContextBox(pointer: loaded)
         loadedModelPath = path
     }

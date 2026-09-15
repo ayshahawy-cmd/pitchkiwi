@@ -7,11 +7,11 @@ public enum AudioFileLoader {
         let format = file.processingFormat
         guard format.channelCount > 0,
               let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: AVAudioFrameCount(file.length)) else {
-            throw VibeFlowError.microphoneUnavailable
+            throw PitchKiwiError.microphoneUnavailable
         }
         try file.read(into: buffer)
         guard let channel = buffer.floatChannelData?.pointee else {
-            throw VibeFlowError.microphoneUnavailable
+            throw PitchKiwiError.microphoneUnavailable
         }
         let samples = Array(UnsafeBufferPointer(start: channel, count: Int(buffer.frameLength)))
         let converted = AVAudioCaptureService.resample(samples, from: format.sampleRate, to: 16_000)

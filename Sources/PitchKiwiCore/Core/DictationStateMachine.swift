@@ -7,7 +7,7 @@ public actor DictationStateMachine {
 
     public func transition(to next: DictationPhase) throws {
         guard Self.allowed[phase, default: []].contains(next) else {
-            throw VibeFlowError.invalidTransition(from: phase, to: next)
+            throw PitchKiwiError.invalidTransition(from: phase, to: next)
         }
         phase = next
     }

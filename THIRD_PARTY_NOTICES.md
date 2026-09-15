@@ -1,6 +1,6 @@
 # Third-party notices
 
-VibeFlow ships or interoperates with the following open-source components. Keep this file with redistributed builds.
+PitchKiwi ships or interoperates with the following open-source components. Keep this file with redistributed builds.
 
 ## whisper.cpp
 

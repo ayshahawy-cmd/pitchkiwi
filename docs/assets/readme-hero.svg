@@ -22,20 +22,33 @@
   <circle cx="1094" cy="74" r="126" fill="#8FC51F" fill-opacity="0.06"/>
   <circle cx="88" cy="438" r="150" fill="#78CAB9" fill-opacity="0.05"/>
 
-  <g transform="translate(505 58)">
-    <rect width="190" height="190" rx="46" fill="url(#lime)" filter="url(#shadow)"/>
-    <g fill="#142014">
-      <rect x="37" y="80" width="14" height="31" rx="7"/>
-      <rect x="59" y="62" width="14" height="67" rx="7"/>
-      <rect x="81" y="45" width="14" height="101" rx="7"/>
-      <rect x="103" y="57" width="14" height="77" rx="7"/>
-      <rect x="125" y="70" width="14" height="51" rx="7"/>
-      <rect x="147" y="84" width="14" height="23" rx="7"/>
+  <g transform="translate(505 58)" filter="url(#shadow)">
+    <rect width="190" height="190" rx="46" fill="#F3EED6"/>
+    <circle cx="95" cy="95" r="72" fill="#65401F"/>
+    <circle cx="95" cy="95" r="63" fill="url(#lime)"/>
+    <ellipse cx="95" cy="95" rx="18" ry="24" fill="#F4F0CF"/>
+    <g fill="#202A13">
+      <ellipse cx="95" cy="43" rx="4" ry="9"/>
+      <ellipse cx="128" cy="55" rx="4" ry="9" transform="rotate(35 128 55)"/>
+      <ellipse cx="146" cy="88" rx="4" ry="9" transform="rotate(76 146 88)"/>
+      <ellipse cx="133" cy="128" rx="4" ry="9" transform="rotate(135 133 128)"/>
+      <ellipse cx="95" cy="147" rx="4" ry="9"/>
+      <ellipse cx="57" cy="128" rx="4" ry="9" transform="rotate(45 57 128)"/>
+      <ellipse cx="44" cy="88" rx="4" ry="9" transform="rotate(104 44 88)"/>
+      <ellipse cx="62" cy="55" rx="4" ry="9" transform="rotate(145 62 55)"/>
+    </g>
+    <g fill="#17220F">
+      <rect x="66" y="86" width="6" height="18" rx="3"/>
+      <rect x="76" y="78" width="6" height="34" rx="3"/>
+      <rect x="86" y="70" width="6" height="50" rx="3"/>
+      <rect x="98" y="80" width="6" height="30" rx="3"/>
+      <rect x="108" y="74" width="6" height="42" rx="3"/>
+      <rect x="118" y="86" width="6" height="18" rx="3"/>
     </g>
   </g>
 
-  <text x="600" y="302" fill="#F5F7F2" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="54" font-weight="700" text-anchor="middle" letter-spacing="-1.5">VibeFlow</text>
-  <text x="600" y="344" fill="#B9C2B7" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="20" font-weight="500" text-anchor="middle">Private voice-to-text for developers on macOS</text>
+  <text x="600" y="302" fill="#F5F7F2" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="54" font-weight="700" text-anchor="middle" letter-spacing="-1.5">PitchKiwi</text>
+  <text x="600" y="344" fill="#B9C2B7" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="20" font-weight="500" text-anchor="middle">Rambling in. Clear developer prompts out. All on your Mac.</text>
 
   <g transform="translate(394 382)" filter="url(#shadow)">
     <rect width="412" height="64" rx="32" fill="#F4F7F0" fill-opacity="0.10" stroke="#FFFFFF" stroke-opacity="0.14"/>
