@@ -78,6 +78,8 @@ Controls:
 - ephemeral job value cleared on completion;
 - optional HUD badge when context was used.
 
+The current implementation requests only the Accessibility range spanning up to 1,000 characters before and after the insertion point. It immediately reduces that bounded string to at most 40 names and developer-shaped recognition hints, then clears both at the end of the dictation job. If the range API is unavailable, context collection returns nothing rather than reading the complete field.
+
 ### Unsafe insertion
 
 Controls:

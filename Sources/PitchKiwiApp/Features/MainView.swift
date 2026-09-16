@@ -482,6 +482,10 @@ private struct HomeView: View {
                         HStack {
                             Button("Copy") { model.copyLastTranscript() }.disabled(model.lastTranscript.isEmpty)
                             Button("Open in scratchpad") { model.putLastInScratchpad() }.disabled(model.lastTranscript.isEmpty)
+                            Button(model.showingOriginalTranscript ? "Show cleaned" : "Show original") {
+                                model.toggleOriginalTranscript()
+                            }
+                            .disabled(!model.hasTranscriptAlternative)
                             Spacer()
                         }
                     }
@@ -794,7 +798,7 @@ private struct SettingsView: View {
                     .frame(width: 140)
                 }
 
-                SettingCard(icon: "scope", title: "Nearby text context", description: "Off by default. The current build never captures screenshots or full documents.") {
+                SettingCard(icon: "scope", title: "Nearby text context", description: "Off by default. When enabled, PitchKiwi reads up to 1,000 characters before and after the cursor, extracts at most 40 names or developer tokens for this dictation, then discards them. It never captures screenshots or full documents.") {
                     Toggle("Context", isOn: $store.contextEnabled)
                 }
 

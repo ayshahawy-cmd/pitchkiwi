@@ -6,7 +6,7 @@
   <img alt="macOS 14 or newer" src="https://img.shields.io/badge/macOS-14%2B-111111?style=flat-square&amp;logo=apple&amp;logoColor=white">
   <img alt="Swift 6" src="https://img.shields.io/badge/Swift-6-F05138?style=flat-square&amp;logo=swift&amp;logoColor=white">
   <img alt="Local first" src="https://img.shields.io/badge/inference-local-9BCB38?style=flat-square">
-  <a href="https://github.com/ayshahawy-cmd/vibeflow/actions/workflows/ci.yml"><img alt="CI status" src="https://github.com/ayshahawy-cmd/vibeflow/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://github.com/ayshahawy-cmd/pitchkiwi/actions/workflows/ci.yml"><img alt="CI status" src="https://github.com/ayshahawy-cmd/pitchkiwi/actions/workflows/ci.yml/badge.svg"></a>
   <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-6E7A68?style=flat-square"></a>
 </p>
 
@@ -26,8 +26,10 @@ PitchKiwi is a native, open-source macOS voice tool for developers, vibe coders,
 | --- | --- |
 | **Fast capture** | Hold Fn for push-to-talk, or double-press Fn for hands-free dictation. |
 | **Prompt mode** | Organizes only what you said into Goal, Context, Requirements, and Done when. |
-| **Clean dictation** | Removes conservative filler, repeated words, and repeated multi-word phrases. |
+| **Smart cleanup** | Removes strong filler, repeated phrases, false starts, and explicit corrections such as “actually no” or “scratch that.” |
+| **Structured speech** | Turns spoken numbered sequences into lists and understands punctuation commands. |
 | **Developer aware** | Handles terms, casing commands, Markdown punctuation, snippets, and a personal dictionary. |
+| **Context aware** | Optionally uses a small, bounded window around the cursor as ephemeral recognition hints. |
 | **Local by design** | Whisper inference and deterministic cleanup happen on your Mac. |
 | **Safe insertion** | Inserts text without pressing Return, submitting forms, or executing terminal commands. |
 | **Private defaults** | Audio is never saved; transcript history and nearby-context reading start off. |
@@ -37,7 +39,7 @@ PitchKiwi is a native, open-source macOS voice tool for developers, vibe coders,
 
 ### From GitHub Releases
 
-1. Open the repository's [latest release](https://github.com/ayshahawy-cmd/vibeflow/releases/latest).
+1. Open the repository's [latest release](https://github.com/ayshahawy-cmd/pitchkiwi/releases/latest).
 2. Download `PitchKiwi-macOS.zip` and unzip it.
 3. Move `PitchKiwi.app` into your **Applications** folder.
 4. On the first launch, right-click PitchKiwi and choose **Open**.
@@ -55,8 +57,8 @@ Requirements:
 - About 500 MB free for the framework, model, and build output
 
 ```bash
-git clone https://github.com/ayshahawy-cmd/vibeflow.git
-cd vibeflow
+git clone https://github.com/ayshahawy-cmd/pitchkiwi.git
+cd pitchkiwi
 ./scripts/bootstrap.sh
 swift test
 ./scripts/build-app.sh
@@ -90,7 +92,9 @@ Press **Escape** while listening to cancel. PitchKiwi never synthesizes Return/E
 > [!TIP]
 > If Fn opens Emoji & Symbols, changes your input source, or starts Apple Dictation, go to **System Settings → Keyboard** and set the Fn/Globe-key action to **Do Nothing**. PitchKiwi can still observe Fn while Accessibility access is enabled.
 
-The first transcription after launch may be slower while the model loads and Metal initializes. The current version performs transcription after you stop speaking; streaming partial results are on the roadmap. For higher speech-recognition accuracy, you can import a larger compatible Whisper GGML model from Settings at the cost of more disk space and slower processing.
+The first transcription after launch may be slower while the model loads and Metal initializes. The current version performs transcription after you stop speaking; streaming partial results are on the roadmap. It uses beam-search decoding for stronger technical-word selection. For higher speech-recognition accuracy, import a larger compatible English Whisper GGML model from Settings at the cost of more disk space and slower processing.
+
+After each result, **Show original** lets you compare Whisper's raw transcript with PitchKiwi's cleaned output. Cleanup remains deterministic and inspectable; it does not use a second language model or invent missing requirements.
 
 ## First-launch onboarding
 
@@ -134,6 +138,7 @@ Focused text field
 | Dictionary and snippets | Local | `~/Library/Application Support/PitchKiwi/pitchkiwi.json` |
 | Usage counters | Local | Content-free totals in the same JSON file |
 | Whisper model | Local | Bundled in the app or imported under PitchKiwi Application Support |
+| Nearby context | Off; one job when enabled | At most 1,000 characters before and after the cursor are reduced to 40 hints and discarded |
 | Onboarding completion | Local | macOS application preferences |
 
 The JSON data file is written atomically with owner-only permissions. The app contains no account, analytics, advertising, cloud transcription, or sync integration. During the guarded paste fallback, other clipboard utilities may briefly observe the transcript; PitchKiwi restores the previous clipboard when it can.
@@ -146,8 +151,8 @@ Read the full [security and privacy design](docs/SECURITY.md) and the repository
 | --- | --- |
 | Application | Swift 6, SwiftUI, focused AppKit bridges |
 | Audio | AVFoundation / `AVAudioEngine`, 16 kHz mono PCM |
-| Speech recognition | `whisper.cpp`, local GGML model, Metal acceleration |
-| Cleanup | Deterministic Swift pipeline for filler, phrase de-duplication, punctuation, and prompt structure |
+| Speech recognition | `whisper.cpp`, local GGML model, Metal acceleration, beam-search decoding |
+| Cleanup | Deterministic Swift pipeline for filler, backtracking, phrase de-duplication, punctuation, lists, and prompt structure |
 | Global controls | AppKit event monitoring with Fn gesture state machine |
 | Text insertion | macOS Accessibility APIs with guarded clipboard fallback |
 | Persistence | Codable JSON, atomic writes, file mode `0600` |

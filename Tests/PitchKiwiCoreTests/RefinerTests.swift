@@ -107,6 +107,97 @@ final class RefinerTests: XCTestCase {
         XCTAssertEqual(result.text, "Hello, world. This is tighter? Yes")
     }
 
+    func testActuallyNoKeepsOnlyTheCorrectedIntent() {
+        let result = refiner.refine(
+            text: "I want to redesign the settings page, actually no, I want to simplify the onboarding",
+            dictionary: [], snippets: [], developerMode: false, mode: .dictate
+        )
+        XCTAssertEqual(result.text, "I want to simplify the onboarding")
+        XCTAssertTrue(result.changes.contains { $0.kind == .backtrack })
+    }
+
+    func testScratchThatBacktracksTheFalseStart() {
+        let result = refiner.refine(
+            text: "Build a sidebar, scratch that, build a command palette",
+            dictionary: [], snippets: [], developerMode: false, mode: .dictate
+        )
+        XCTAssertEqual(result.text, "Build a command palette")
+    }
+
+    func testBareActuallyCorrectsComparableValuesButPreservesSemanticUse() {
+        let corrected = refiner.refine(
+            text: "Let's meet on Tuesday, actually Wednesday",
+            dictionary: [], snippets: [], developerMode: false, mode: .dictate
+        )
+        XCTAssertEqual(corrected.text, "Let's meet on Wednesday")
+
+        let semantic = refiner.refine(
+            text: "I actually enjoyed the demo",
+            dictionary: [], snippets: [], developerMode: false, mode: .dictate
+        )
+        XCTAssertEqual(semantic.text, "I actually enjoyed the demo")
+    }
+
+    func testNaturalRestatementKeepsTheLatestPhrase() {
+        let result = refiner.refine(
+            text: "I wanted to buy a record as a gift as a present",
+            dictionary: [], snippets: [], developerMode: false, mode: .dictate
+        )
+        XCTAssertEqual(result.text, "I wanted to buy a record as a present")
+    }
+
+    func testSpokenNumberedListBecomesStructuredList() {
+        let result = refiner.refine(
+            text: "My top goals are one finish the report two send the presentation three update the issue",
+            dictionary: [], snippets: [], developerMode: false, mode: .dictate
+        )
+        XCTAssertEqual(
+            result.text,
+            "My top goals are:\n1. Finish the report\n2. Send the presentation\n3. Update the issue"
+        )
+        XCTAssertTrue(result.changes.contains { $0.kind == .listFormatting })
+    }
+
+    func testSpokenListRepairsWhisperNumberHomophonesOnlyWithAListCue() {
+        let result = refiner.refine(
+            text: "The changes are one remove filler words to preserve the meaning three never press return",
+            dictionary: [],
+            snippets: [],
+            developerMode: true,
+            mode: .dictate
+        )
+
+        XCTAssertEqual(
+            result.text,
+            "The changes are:\n1. Remove filler words\n2. Preserve the meaning\n3. Never press return"
+        )
+        XCTAssertEqual(
+            refiner.refine(
+                text: "I want to preserve the meaning",
+                dictionary: [],
+                snippets: [],
+                developerMode: true,
+                mode: .dictate
+            ).text,
+            "I want to preserve the meaning"
+        )
+    }
+
+    func testSpokenListPreservesTheSentenceBeforeItsHeading() {
+        let result = refiner.refine(
+            text: "Make the button green. new paragraph period The changes are one remove filler words to preserve meaning three never press return",
+            dictionary: [],
+            snippets: [],
+            developerMode: true,
+            mode: .dictate
+        )
+
+        XCTAssertEqual(
+            result.text,
+            "Make the button green.\n\nThe changes are:\n1. Remove filler words\n2. Preserve meaning\n3. Never press return"
+        )
+    }
+
     func testPromptModeStructuresOnlyPresentContent() {
         let result = refiner.refine(
             text: "I want to build a local dictation app. For context it runs on a Mac. Make sure it never sends audio to a server. Done when it inserts text into Cursor.",

@@ -23,6 +23,12 @@ public struct DeterministicRefiner: TextRefining {
             return RefinementResult(text: snippet.expansion, changes: [.init(kind: .snippet)])
         }
 
+        let backtracked = applyBacktrack(to: text)
+        if backtracked != text {
+            text = backtracked
+            changes.append(.init(kind: .backtrack))
+        }
+
         let withoutFillers = removeFillers(from: text)
         if withoutFillers != text {
             text = withoutFillers
@@ -69,7 +75,104 @@ public struct DeterministicRefiner: TextRefining {
             }
         }
 
+        let listed = formatSpokenNumberedList(text)
+        if listed != text {
+            text = listed
+            changes.append(.init(kind: .listFormatting))
+        }
+
         return RefinementResult(text: text, changes: changes)
+    }
+
+    private func applyBacktrack(to input: String) -> String {
+        let text = collapseNaturalRestatements(in: input)
+        let explicitPattern = #"(?i)\b(?:scratch that|never mind|actually no|no wait|wait no|correction)\b[\s,;:—-]*"#
+
+        if let marker = lastMatch(in: text, pattern: explicitPattern),
+           let markerRange = Range(marker.range, in: text) {
+            let before = String(text[..<markerRange.lowerBound]).trimmingCharacters(in: .whitespacesAndNewlines.union(.punctuationCharacters))
+            let after = String(text[markerRange.upperBound...]).trimmingCharacters(in: .whitespacesAndNewlines.union(.punctuationCharacters))
+            guard !after.isEmpty else { return text }
+            if wordCount(after) >= 2 {
+                return after
+            }
+            return replaceLastCorrectionUnit(in: before, with: after)
+        }
+
+        // Bare “actually” is treated as a correction only when both sides are
+        // unmistakably replaceable values. Semantic uses such as “I actually
+        // enjoyed it” remain untouched.
+        let actuallyPattern = #"(?i)\bactually\b[\s,;:—-]*"#
+        if let marker = lastMatch(in: text, pattern: actuallyPattern),
+           let markerRange = Range(marker.range, in: text) {
+            let before = String(text[..<markerRange.lowerBound]).trimmingCharacters(in: .whitespacesAndNewlines.union(.punctuationCharacters))
+            let after = String(text[markerRange.upperBound...]).trimmingCharacters(in: .whitespacesAndNewlines.union(.punctuationCharacters))
+            if wordCount(before) >= 3, wordCount(after) == 1,
+               valuesAreComparable(lastWord(in: before), lastWord(in: after)) {
+                return replaceLastCorrectionUnit(in: before, with: after)
+            }
+        }
+        return text
+    }
+
+    private func collapseNaturalRestatements(in input: String) -> String {
+        let patterns = [
+            #"(?i)\b(as an?)\s+([\p{L}\p{N}'-]+(?:\s+[\p{L}\p{N}'-]+){0,3})\s+\1\s+"#,
+            #"(?i)\b((?:i|we)\s+(?:want|need|wanted|needed)\s+to)\s+(.{1,90}?)\s+\1\s+"#,
+        ]
+        var text = input
+        for pattern in patterns {
+            guard let regex = try? NSRegularExpression(pattern: pattern) else { continue }
+            while let match = regex.firstMatch(in: text, range: NSRange(text.startIndex..., in: text)),
+                  let abandonedRange = Range(match.range(at: 2), in: text),
+                  let wholeRange = Range(match.range, in: text),
+                  let anchorRange = Range(match.range(at: 1), in: text) {
+                let abandoned = text[abandonedRange].lowercased()
+                if abandoned.range(of: #"\b(?:and|also|then|plus)\b|[.!?]"#, options: .regularExpression) != nil {
+                    break
+                }
+                let anchor = String(text[anchorRange])
+                text.replaceSubrange(wholeRange, with: "\(anchor) ")
+            }
+        }
+        return text
+    }
+
+    private func replaceLastCorrectionUnit(in input: String, with replacement: String) -> String {
+        guard !input.isEmpty,
+              let regex = try? NSRegularExpression(pattern: #"[\p{L}\p{N}_.'-]+(?=[^\p{L}\p{N}_.'-]*$)"#),
+              let match = regex.firstMatch(in: input, range: NSRange(input.startIndex..., in: input)),
+              let range = Range(match.range, in: input) else {
+            return replacement
+        }
+        var result = input
+        result.replaceSubrange(range, with: replacement)
+        return result
+    }
+
+    private func valuesAreComparable(_ left: String?, _ right: String?) -> Bool {
+        guard let left = left?.lowercased(), let right = right?.lowercased() else { return false }
+        let numericWords: Set<String> = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"]
+        let weekdays: Set<String> = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+        let colors: Set<String> = ["red", "orange", "yellow", "green", "blue", "purple", "black", "white", "gray", "grey"]
+        let bothDigits = Double(left) != nil && Double(right) != nil
+        return bothDigits
+            || (numericWords.contains(left) && numericWords.contains(right))
+            || (weekdays.contains(left) && weekdays.contains(right))
+            || (colors.contains(left) && colors.contains(right))
+    }
+
+    private func lastWord(in input: String) -> String? {
+        input.split(whereSeparator: { $0.isWhitespace || $0.isPunctuation }).last.map(String.init)
+    }
+
+    private func wordCount(_ input: String) -> Int {
+        input.split(whereSeparator: { $0.isWhitespace || $0.isPunctuation }).count
+    }
+
+    private func lastMatch(in input: String, pattern: String) -> NSTextCheckingResult? {
+        guard let regex = try? NSRegularExpression(pattern: pattern) else { return nil }
+        return regex.matches(in: input, range: NSRange(input.startIndex..., in: input)).last
     }
 
     private func removeFillers(from input: String) -> String {
@@ -264,6 +367,9 @@ public struct DeterministicRefiner: TextRefining {
         text = replace(text, pattern: #"[ \t]{2,}"#, with: " ")
         text = replace(text, pattern: #"\n[ \t]+"#, with: "\n")
         text = replace(text, pattern: #"\n{3,}"#, with: "\n\n")
+        // Whisper may punctuate both sides of a spoken “new paragraph”
+        // command, leaving a stray period at the start of the next paragraph.
+        text = replace(text, pattern: #"(?m)^[ \t]*\.\s+(?=\p{L})"#, with: "")
 
         if let first = text.first, first.isLetter, first.isLowercase {
             text.replaceSubrange(text.startIndex...text.startIndex, with: String(first).uppercased())
@@ -283,6 +389,74 @@ public struct DeterministicRefiner: TextRefining {
             text.replaceSubrange(range, with: text[range].uppercased())
         }
         return text
+    }
+
+    private func formatSpokenNumberedList(_ input: String) -> String {
+        let numberAliases: [Set<String>] = [
+            ["one"], ["two", "to", "too"], ["three"], ["four", "for"], ["five"],
+        ]
+        guard let regex = try? NSRegularExpression(
+            pattern: #"(?i)\b(one|two|to|too|three|four|for|five)\b"#
+        ) else { return input }
+        let allMatches = regex.matches(in: input, range: NSRange(input.startIndex..., in: input))
+        guard let firstIndex = allMatches.firstIndex(where: { match in
+            guard let range = Range(match.range(at: 1), in: input) else { return false }
+            return input[range].lowercased() == "one"
+        }), let firstRange = Range(allMatches[firstIndex].range, in: input) else { return input }
+
+        let rawIntro = String(input[..<firstRange.lowerBound])
+        let (prefix, intro) = splitListIntroduction(rawIntro)
+        let loweredIntro = intro.lowercased()
+        let hasListCue = ["goals", "steps", "items", "things", "tasks", "changes", "requirements", "priorities", "following"]
+            .contains { loweredIntro.contains($0) }
+        guard hasListCue else { return input }
+
+        var sequence: [NSTextCheckingResult] = []
+        for match in allMatches[firstIndex...] {
+            guard sequence.count < numberAliases.count,
+                  let wordRange = Range(match.range(at: 1), in: input) else { break }
+            let spokenNumber = input[wordRange].lowercased()
+            if numberAliases[sequence.count].contains(spokenNumber) {
+                sequence.append(match)
+            }
+        }
+        guard sequence.count >= 2 else { return input }
+
+        var items: [String] = []
+        for (index, match) in sequence.enumerated() {
+            guard let markerRange = Range(match.range, in: input) else { break }
+            let end = index + 1 < sequence.count
+                ? Range(sequence[index + 1].range, in: input)!.lowerBound
+                : input.endIndex
+            var item = String(input[markerRange.upperBound..<end])
+                .trimmingCharacters(in: .whitespacesAndNewlines.union(.punctuationCharacters))
+            guard !item.isEmpty else { break }
+            if let first = item.first, first.isLowercase {
+                item.replaceSubrange(item.startIndex...item.startIndex, with: String(first).uppercased())
+            }
+            items.append(item)
+        }
+        guard items.count >= 2 else { return input }
+
+        let heading = intro.hasSuffix(":") ? intro : "\(intro):"
+        let list = heading + "\n" + items.enumerated().map { "\($0.offset + 1). \($0.element)" }.joined(separator: "\n")
+        return prefix.isEmpty ? list : prefix + "\n\n" + list
+    }
+
+    private func splitListIntroduction(_ input: String) -> (prefix: String, heading: String) {
+        guard let regex = try? NSRegularExpression(pattern: #"(?:[.!?][ \t]+|\n+)"#) else {
+            return ("", input.trimmingCharacters(in: .whitespacesAndNewlines.union(.punctuationCharacters)))
+        }
+        let matches = regex.matches(in: input, range: NSRange(input.startIndex..., in: input))
+        guard let boundary = matches.last,
+              let boundaryRange = Range(boundary.range, in: input) else {
+            return ("", input.trimmingCharacters(in: .whitespacesAndNewlines.union(.punctuationCharacters)))
+        }
+        let prefix = String(input[..<boundaryRange.upperBound])
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let heading = String(input[boundaryRange.upperBound...])
+            .trimmingCharacters(in: .whitespacesAndNewlines.union(.punctuationCharacters))
+        return (prefix, heading)
     }
 
     private func replace(_ input: String, pattern: String, with replacement: String) -> String {

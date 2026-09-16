@@ -97,6 +97,57 @@ public final class AccessibilityInsertionService: TextInserting, @unchecked Send
         try await pasteWithRestoration(text, targetPID: expectedPID)
     }
 
+    public func contextHints(around target: InsertionTarget, limit: Int = 40) async -> [String] {
+        guard limit > 0,
+              Self.isAccessibilityTrusted,
+              !target.isSecure,
+              let element = target.element,
+              !Self.isSecure(element) else { return [] }
+
+        var selectedValue: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(
+            element,
+            kAXSelectedTextRangeAttribute as CFString,
+            &selectedValue
+        ) == .success,
+        let selectedValue,
+        CFGetTypeID(selectedValue) == AXValueGetTypeID() else { return [] }
+
+        var selectedRange = CFRange()
+        guard AXValueGetValue(selectedValue as! AXValue, .cfRange, &selectedRange) else { return [] }
+        let location = max(0, selectedRange.location)
+        let start = max(0, location - 1_000)
+        var characterCountValue: CFTypeRef?
+        let characterCount: Int
+        if AXUIElementCopyAttributeValue(
+            element,
+            kAXNumberOfCharactersAttribute as CFString,
+            &characterCountValue
+        ) == .success,
+        let number = characterCountValue as? NSNumber {
+            characterCount = number.intValue
+        } else {
+            characterCount = location
+        }
+        var boundedRange = CFRange(
+            location: start,
+            length: max(0, min(2_000, characterCount - start))
+        )
+        guard boundedRange.length > 0 else { return [] }
+        guard let rangeValue = AXValueCreate(.cfRange, &boundedRange) else { return [] }
+
+        var contextValue: CFTypeRef?
+        guard AXUIElementCopyParameterizedAttributeValue(
+            element,
+            kAXStringForRangeParameterizedAttribute as CFString,
+            rangeValue,
+            &contextValue
+        ) == .success,
+        let context = contextValue as? String else { return [] }
+
+        return ContextHintExtractor.extract(from: context, limit: limit)
+    }
+
     private static func focusedElement() -> AXUIElement? {
         let system = AXUIElementCreateSystemWide()
         var value: CFTypeRef?
@@ -178,6 +229,35 @@ enum InsertionStrategyPolicy {
         return webOrElectronPrefixes.contains { identifier.hasPrefix($0) }
             || identifier.contains("cursor")
             || identifier.contains("windsurf")
+    }
+}
+
+enum ContextHintExtractor {
+    static func extract(from context: String, limit: Int) -> [String] {
+        guard limit > 0,
+              let regex = try? NSRegularExpression(
+                pattern: #"(?<![\p{L}\p{N}_])[\p{L}][\p{L}\p{N}_.:@/\-]{1,63}(?![\p{L}\p{N}_])"#
+              ) else { return [] }
+
+        let ordinaryWords: Set<String> = [
+            "this", "that", "with", "from", "have", "will", "your", "what", "when",
+            "where", "which", "into", "about", "then", "than", "just", "make", "build",
+            "open", "close", "create", "update", "remove", "please", "should", "would",
+        ]
+        var seen: Set<String> = []
+        var hints: [String] = []
+        for match in regex.matches(in: context, range: NSRange(context.startIndex..., in: context)) {
+            guard let range = Range(match.range, in: context) else { continue }
+            let token = String(context[range])
+            let lowered = token.lowercased()
+            let hasDeveloperShape = token.contains(where: { "_./@-".contains($0) })
+                || token.dropFirst().contains(where: \Character.isUppercase)
+                || token.first?.isUppercase == true
+            guard hasDeveloperShape, !ordinaryWords.contains(lowered), seen.insert(lowered).inserted else { continue }
+            hints.append(token)
+            if hints.count == limit { break }
+        }
+        return hints
     }
 }
 

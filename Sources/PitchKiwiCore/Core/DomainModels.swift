@@ -81,7 +81,9 @@ public struct RefinementChange: Codable, Identifiable, Equatable, Sendable {
     public enum Kind: String, Codable, Sendable {
         case filler
         case repetition
+        case backtrack
         case punctuation
+        case listFormatting
         case correction
         case snippet
         case developerToken

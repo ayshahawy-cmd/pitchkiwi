@@ -13,6 +13,8 @@ Pure Swift transformations handle predictable operations:
 - whitespace, punctuation, and paragraph breaks;
 - immediately repeated words/phrases, including comma-separated false starts;
 - strong hesitation removal for forms such as `um`, `umm`, `uhm`, `erm`, and clearly parenthetical discourse markers;
+- bounded Backtrack rules for explicit corrections such as `actually no`, `scratch that`, `never mind`, comparable-value replacements, and short natural restatements;
+- cue-based numbered-list formatting for sequential `one`, `two`, `three` speech;
 - dictionary corrections and casing;
 - snippet expansion;
 - spoken developer symbols and formatting commands;

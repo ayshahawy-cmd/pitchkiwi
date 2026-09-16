@@ -11,6 +11,8 @@ final class AppModel: ObservableObject {
     @Published private(set) var phase: DictationPhase = .idle
     @Published private(set) var statusText = "Ready"
     @Published private(set) var lastTranscript = ""
+    @Published private(set) var lastRawTranscript = ""
+    @Published private(set) var showingOriginalTranscript = false
     @Published private(set) var modelURL: URL?
     @Published private(set) var handsFreeMode = false
     @Published private(set) var audioLevel: Float = 0
@@ -25,6 +27,8 @@ final class AppModel: ObservableObject {
     private let refiner: TextRefining = DeterministicRefiner()
     private let inserter: TextInserting = AccessibilityInsertionService()
     private var insertionTarget = InsertionTarget(processIdentifier: nil, element: nil, isSecure: false)
+    private var contextHints: [String] = []
+    private var lastCleanedTranscript = ""
     private var activeTask: Task<Void, Never>?
     private var audioIsCapturing = false
     private var releaseRequested = false
@@ -48,6 +52,9 @@ final class AppModel: ObservableObject {
     }
 
     var modelReady: Bool { modelURL != nil }
+    var hasTranscriptAlternative: Bool {
+        !lastRawTranscript.isEmpty && lastRawTranscript != lastCleanedTranscript
+    }
 
     func beginDictation() {
         guard !phase.isActive else { return }
@@ -76,6 +83,7 @@ final class AppModel: ObservableObject {
         audioIsCapturing = false
         activeTask?.cancel()
         stopLevelMonitoring()
+        contextHints.removeAll(keepingCapacity: false)
         activeTask = Task {
             try? await move(to: .cancelling)
             await audio.cancel()
@@ -100,6 +108,13 @@ final class AppModel: ObservableObject {
         pasteboard.clearContents()
         pasteboard.setString(lastTranscript, forType: .string)
         statusText = "Copied"
+    }
+
+    func toggleOriginalTranscript() {
+        guard hasTranscriptAlternative else { return }
+        showingOriginalTranscript.toggle()
+        lastTranscript = showingOriginalTranscript ? lastRawTranscript : lastCleanedTranscript
+        statusText = showingOriginalTranscript ? "Showing original" : "Showing cleaned result"
     }
 
     func putLastInScratchpad() {
@@ -176,6 +191,9 @@ final class AppModel: ObservableObject {
             try await move(to: .listening)
             statusText = "Listening"
             insertionTarget = await inserter.captureTarget()
+            contextHints = store.contextEnabled
+                ? await inserter.contextHints(around: insertionTarget, limit: 40)
+                : []
             try await audio.start()
             microphoneAuthorized = true
             audioIsCapturing = true
@@ -198,8 +216,10 @@ final class AppModel: ObservableObject {
             stopLevelMonitoring()
             guard let modelURL else { throw PitchKiwiError.modelMissing }
 
-            let hints = store.dictionary.filter(\.isEnabled).map(\.writtenForm)
+            let dictionaryHints = store.dictionary.filter(\.isEnabled).map(\.writtenForm)
+            let hints = Array((dictionaryHints + contextHints).prefix(40))
             let raw = try await transcriber.transcribe(captured, modelURL: modelURL, hints: hints)
+            contextHints.removeAll(keepingCapacity: false)
 
             try await move(to: .refining)
             statusText = "Cleaning up"
@@ -210,7 +230,10 @@ final class AppModel: ObservableObject {
                 developerMode: store.developerMode,
                 mode: store.dictationMode
             )
+            lastRawTranscript = raw.text
+            lastCleanedTranscript = refined.text
             lastTranscript = refined.text
+            showingOriginalTranscript = false
             store.record(text: refined.text, duration: captured.duration, changes: refined.changes, mode: store.dictationMode)
 
             try await move(to: .inserting)
@@ -230,6 +253,7 @@ final class AppModel: ObservableObject {
         } catch is CancellationError {
             stopLevelMonitoring()
             audioIsCapturing = false
+            contextHints.removeAll(keepingCapacity: false)
             await audio.cancel()
             await machine.reset()
             phase = .idle
@@ -248,6 +272,7 @@ final class AppModel: ObservableObject {
         handsFreeMode = false
         releaseRequested = false
         audioIsCapturing = false
+        contextHints.removeAll(keepingCapacity: false)
         stopLevelMonitoring()
         await audio.cancel()
         let current = await machine.phase

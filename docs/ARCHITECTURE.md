@@ -162,6 +162,8 @@ Audio lifecycle is memory only. Diagnostic audio capture must require a separate
 
 Use the maintained `ggml-org/whisper.cpp` source/package or a repository-built XCFramework pinned by revision and checksum. Enable Metal on Apple Silicon. Keep the C API behind a narrow Swift actor to serialize model access and make cancellation explicit.
 
+The default decoder uses a bounded beam search, preserves decoder context across windows in one dictation, and carries the bounded dictionary/context hint prompt forward. This costs some finish latency compared with a single greedy pass but improves long-form coherence and technical-word selection.
+
 Initial model tiers, subject to benchmark validation:
 
 | Tier | Candidate | Purpose |
@@ -198,6 +200,8 @@ Context levels:
 - `developerVisible`: `focusedField` plus visible Accessibility labels for editor tabs/file tree within strict time and item limits.
 
 No level captures screenshots, browser history, the pasteboard, hidden windows, full files, or unrelated conversations. The sensitive-target policy blocks secure roles and user-configured bundle identifiers. Collection times out rather than delaying dictation.
+
+The current implementation uses the `focusedField` boundary only when Context is enabled, immediately extracts at most 40 casing-sensitive names and developer-shaped tokens, supplies those as Whisper hints, and then discards both the bounded text and hints at the end of the job. It never falls back to reading an entire field when the bounded Accessibility range API is unavailable.
 
 ## 10. Text insertion
 

@@ -24,6 +24,7 @@ public protocol TextRefining: Sendable {
 
 public protocol TextInserting: Sendable {
     func captureTarget() async -> InsertionTarget
+    func contextHints(around target: InsertionTarget, limit: Int) async -> [String]
     func insert(_ text: String, into target: InsertionTarget) async throws
 }
 
