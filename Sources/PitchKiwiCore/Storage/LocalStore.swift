@@ -11,6 +11,7 @@ public final class LocalStore: ObservableObject {
     @Published public var developerMode: Bool { didSet { save() } }
     @Published public var contextEnabled: Bool { didSet { save() } }
     @Published public var dictationMode: DictationMode { didSet { save() } }
+    @Published public var promptLength: PromptLength { didSet { save() } }
 
     private let fileURL: URL
     private var isLoading = true
@@ -40,6 +41,7 @@ public final class LocalStore: ObservableObject {
         developerMode = decoded.developerMode
         contextEnabled = decoded.contextEnabled
         dictationMode = decoded.dictationMode
+        promptLength = decoded.promptLength
         dictionarySeedVersion = decoded.dictionarySeedVersion
         isLoading = false
         prune()
@@ -108,6 +110,7 @@ public final class LocalStore: ObservableObject {
             developerMode: developerMode,
             contextEnabled: contextEnabled,
             dictationMode: dictationMode,
+            promptLength: promptLength,
             dictionarySeedVersion: dictionarySeedVersion
         )
         do {
@@ -153,10 +156,11 @@ private struct Payload: Codable {
     var developerMode = true
     var contextEnabled = false
     var dictationMode: DictationMode = .dictate
+    var promptLength: PromptLength = .medium
     var dictionarySeedVersion = Self.currentDictionarySeedVersion
 
     private enum CodingKeys: String, CodingKey {
-        case dictionary, snippets, transcripts, metrics, retention, developerMode, contextEnabled, dictationMode, dictionarySeedVersion
+        case dictionary, snippets, transcripts, metrics, retention, developerMode, contextEnabled, dictationMode, promptLength, dictionarySeedVersion
     }
 
     init() {}
@@ -170,6 +174,7 @@ private struct Payload: Codable {
         developerMode: Bool,
         contextEnabled: Bool,
         dictationMode: DictationMode,
+        promptLength: PromptLength,
         dictionarySeedVersion: Int
     ) {
         self.dictionary = dictionary
@@ -180,6 +185,7 @@ private struct Payload: Codable {
         self.developerMode = developerMode
         self.contextEnabled = contextEnabled
         self.dictationMode = dictationMode
+        self.promptLength = promptLength
         self.dictionarySeedVersion = dictionarySeedVersion
     }
 
@@ -193,6 +199,7 @@ private struct Payload: Codable {
         developerMode = try values.decodeIfPresent(Bool.self, forKey: .developerMode) ?? true
         contextEnabled = try values.decodeIfPresent(Bool.self, forKey: .contextEnabled) ?? false
         dictationMode = try values.decodeIfPresent(DictationMode.self, forKey: .dictationMode) ?? .dictate
+        promptLength = try values.decodeIfPresent(PromptLength.self, forKey: .promptLength) ?? .medium
         dictionarySeedVersion = try values.decodeIfPresent(Int.self, forKey: .dictionarySeedVersion) ?? 0
     }
 }

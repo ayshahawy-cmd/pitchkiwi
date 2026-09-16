@@ -417,7 +417,7 @@ private struct HomeView: View {
                     eyebrow: "🥝 RAMBLE IN. CLEAR PROMPT OUT.",
                     title: "Turn a messy thought into something your agent can act on.",
                     subtitle: store.dictationMode == .prompt
-                        ? "Prompt mode removes verbal clutter and sorts only what you said into Goal, Context, Requirements, and Done when—without a second AI model."
+                        ? "Prompt mode cleans and structures what you said, then can add a reusable agent brief at the length you choose—without a second AI model."
                         : "Dictate mode preserves your order and voice while removing obvious filler, repeated words, and repeated phrases."
                 )
 
@@ -460,6 +460,27 @@ private struct HomeView: View {
                     .tint(KiwiPalette.accent)
 
                     KeyCap(text: "fn", detail: "hold · double-press hands-free")
+                }
+
+                if store.dictationMode == .prompt {
+                    HStack(spacing: 14) {
+                        Label("Prompt length", systemImage: "text.line.last.and.arrowtriangle.forward")
+                            .font(.headline)
+                        Picker("Prompt length", selection: $store.promptLength) {
+                            ForEach(PromptLength.allCases) { length in
+                                Text(length.title).tag(length)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                        .labelsHidden()
+                        .frame(width: 310)
+                        Text(store.promptLength.explanation)
+                            .font(.callout)
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                    }
+                    .padding(14)
+                    .kiwiGlass(cornerRadius: 14)
                 }
 
                 GroupBox {
@@ -654,8 +675,12 @@ private struct StylesView: View {
                     Text("Always on").foregroundStyle(.secondary)
                 }
 
-                SettingCard(icon: "list.bullet.rectangle", title: "Prompt structure", description: "Sort explicitly stated content into Goal, Context, Requirements, and Done when. Empty sections are omitted and nothing is invented.") {
-                    Label("Local rules", systemImage: "checkmark.seal.fill").foregroundStyle(KiwiPalette.accent)
+                SettingCard(icon: "list.bullet.rectangle", title: "Prompt length", description: "Short preserves only your content. Medium adds a compact execution brief. Detailed adds workflow, safeguards, validation, and deliverable instructions. The added text is a fixed local template—not generated facts.") {
+                    Picker("Prompt length", selection: $store.promptLength) {
+                        ForEach(PromptLength.allCases) { length in Text(length.title).tag(length) }
+                    }
+                    .labelsHidden()
+                    .frame(width: 130)
                 }
             }
             .padding(34)
@@ -669,13 +694,13 @@ private struct TransformsView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            PageHeader(eyebrow: "LOCAL TRANSFORMS", title: "Shape the thought, not the meaning.", subtitle: "Prompt Builder organizes text locally. It does not answer the prompt or add requirements.")
+            PageHeader(eyebrow: "LOCAL TRANSFORMS", title: "Shape the thought, not the meaning.", subtitle: "Prompt Builder organizes your request and can append a fixed agent brief. It never answers the prompt or invents product facts.")
 
             HStack(spacing: 14) {
                 TransformCard(icon: "wand.and.stars", title: "Polish", description: "Run conservative cleanup again and open the result in the scratchpad.") {
                     model.putLastInScratchpad()
                 }
-                TransformCard(icon: "curlybraces.square", title: "Prompt Builder", description: "Organize the last result into only the sections it actually contains—without sending it to another model.") {
+                TransformCard(icon: "curlybraces.square", title: "Prompt Builder", description: "Turn the last result into a (model.store.promptLength.title.lowercased()) agent prompt—without sending it to another model.") {
                     model.makePromptFromLast()
                 }
             }

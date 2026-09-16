@@ -8,7 +8,8 @@ public struct DeterministicRefiner: TextRefining {
         dictionary: [DictionaryEntry],
         snippets: [Snippet],
         developerMode: Bool,
-        mode: DictationMode
+        mode: DictationMode,
+        promptLength: PromptLength
     ) -> RefinementResult {
         var text = input.trimmingCharacters(in: .whitespacesAndNewlines)
         var changes: [RefinementChange] = []
@@ -67,18 +68,23 @@ public struct DeterministicRefiner: TextRefining {
             changes.append(.init(kind: .punctuation))
         }
 
+        let listed = formatSpokenNumberedList(text)
+        if listed != text {
+            text = listed
+            changes.append(.init(kind: .listFormatting))
+        }
+
         if mode == .prompt {
             let structured = structurePrompt(text)
             if structured != text {
                 text = structured
                 changes.append(.init(kind: .promptStructure))
             }
-        }
-
-        let listed = formatSpokenNumberedList(text)
-        if listed != text {
-            text = listed
-            changes.append(.init(kind: .listFormatting))
+            let expanded = expandPrompt(text, length: promptLength)
+            if expanded != text {
+                text = expanded
+                changes.append(.init(kind: .promptExpansion))
+            }
         }
 
         return RefinementResult(text: text, changes: changes)
@@ -279,6 +285,43 @@ public struct DeterministicRefiner: TextRefining {
             return "\(section.title):\n\(body)"
         }
         return rendered.isEmpty ? input : rendered.joined(separator: "\n\n")
+    }
+
+    private func expandPrompt(_ input: String, length: PromptLength) -> String {
+        guard length != .short else { return input }
+
+        let medium = """
+        Agent instructions:
+        - Use the goal and supplied context as the source of truth.
+        - Complete the request directly while preserving every stated constraint.
+        - Make conservative assumptions only when necessary, and call them out.
+        - Check the finished result against the requirements before responding.
+
+        Deliverable:
+        - Return the completed result, followed by a concise summary of what was done and any remaining risks.
+        """
+        guard length == .detailed else { return input + "\n\n" + medium }
+
+        let detailed = """
+        Agent workflow:
+        1. Identify the exact objective, relevant context, constraints, and success conditions from this prompt.
+        2. Inspect the existing material or implementation before changing anything. Reuse established patterns where they fit.
+        3. Resolve ambiguity with the smallest conservative assumption that keeps progress moving; clearly disclose that assumption.
+        4. Complete the request end to end. Do not stop at a plan, partial mockup, or superficial change when implementation is possible.
+        5. Preserve unrelated behavior and avoid broad changes outside the requested scope.
+
+        Quality safeguards:
+        - Do not invent product facts, user decisions, credentials, files, APIs, or completed work.
+        - Keep exact names, commands, paths, code tokens, numbers, and quoted text intact unless the request explicitly changes them.
+        - If the task involves code, inspect relevant files, handle likely edge cases, and run the most relevant available tests or checks.
+        - If something is blocked, explain the concrete blocker and the smallest action needed to continue.
+
+        Final deliverable:
+        - Provide the completed output first.
+        - Briefly summarize the important decisions or changes.
+        - Report validation performed and any remaining limitations or risks.
+        """
+        return input + "\n\n" + detailed
     }
 
     private func stripPromptPrefix(from input: String, pattern: String) -> String {

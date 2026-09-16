@@ -71,6 +71,9 @@ private struct MenuBarContent: View {
         }
         Text(model.handsFreeMode ? "Hands-free • press fn to stop" : "Hold fn • double-press for hands-free")
         Text("Mode: \(model.store.dictationMode.title)")
+        if model.store.dictationMode == .prompt {
+            Text("Prompt length: \(model.store.promptLength.title)")
+        }
         Divider()
         Button("Copy Last Transcript") { model.copyLastTranscript() }
             .disabled(model.lastTranscript.isEmpty)

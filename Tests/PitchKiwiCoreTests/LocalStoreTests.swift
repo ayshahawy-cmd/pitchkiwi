@@ -55,6 +55,18 @@ final class LocalStoreTests: XCTestCase {
         XCTAssertTrue(store.dictionary.contains { $0.writtenForm == "Claude Code" })
         XCTAssertTrue(store.dictionary.contains { $0.writtenForm == "useEffect" })
         XCTAssertEqual(store.dictationMode, .dictate)
+        XCTAssertEqual(store.promptLength, .medium)
         XCTAssertTrue(FileManager.default.fileExists(atPath: directory.appendingPathComponent("pitchkiwi.json").path))
+    }
+
+    func testPromptLengthPersistsLocally() throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: directory) }
+
+        let store = LocalStore(directory: directory)
+        store.promptLength = .detailed
+
+        let reloaded = LocalStore(directory: directory)
+        XCTAssertEqual(reloaded.promptLength, .detailed)
     }
 }

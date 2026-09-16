@@ -4,6 +4,8 @@
 
 PitchKiwi is a local-first macOS dictation utility optimized for long prompts and developer language. It converts speech to text on-device, applies bounded local cleanup, and inserts the result into the active application.
 
+Prompt mode offers Short, Medium, and Detailed output. Short only organizes the speaker's content; larger modes append version-controlled local agent instructions for execution, validation, scope safety, and deliverables without adding product facts or using a second rewrite model.
+
 The v1 success metric is not feature count. It is trustable repetition: a user should be comfortable invoking it dozens of times per day without wondering whether recording started, whether private speech left the machine, whether their clipboard was damaged, or whether a terminal command was executed.
 
 ## 2. Product principles

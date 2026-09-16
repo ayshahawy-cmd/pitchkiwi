@@ -29,6 +29,30 @@ public enum DictationMode: String, Codable, CaseIterable, Sendable, Identifiable
     }
 }
 
+public enum PromptLength: String, Codable, CaseIterable, Sendable, Identifiable {
+    case short
+    case medium
+    case detailed
+
+    public var id: String { rawValue }
+
+    public var title: String {
+        switch self {
+        case .short: "Short"
+        case .medium: "Medium"
+        case .detailed: "Detailed"
+        }
+    }
+
+    public var explanation: String {
+        switch self {
+        case .short: "Clean and organize only what you said."
+        case .medium: "Add a compact execution and validation brief."
+        case .detailed: "Add a complete agent workflow, safeguards, and deliverables."
+        }
+    }
+}
+
 public enum PitchKiwiError: LocalizedError, Equatable, Sendable {
     case invalidTransition(from: DictationPhase, to: DictationPhase)
     case microphonePermissionDenied
@@ -88,6 +112,7 @@ public struct RefinementChange: Codable, Identifiable, Equatable, Sendable {
         case snippet
         case developerToken
         case promptStructure
+        case promptExpansion
     }
 
     public let id: UUID

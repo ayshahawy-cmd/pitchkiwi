@@ -214,6 +214,44 @@ final class RefinerTests: XCTestCase {
         XCTAssertTrue(result.changes.contains { $0.kind == .promptStructure })
     }
 
+    func testPromptLengthsExpandWithFixedLocalAgentGuidance() {
+        let input = "Build a settings page with a prompt length selector. Make sure the selection persists."
+        let short = refiner.refine(
+            text: input,
+            dictionary: [],
+            snippets: [],
+            developerMode: true,
+            mode: .prompt,
+            promptLength: .short
+        )
+        let medium = refiner.refine(
+            text: input,
+            dictionary: [],
+            snippets: [],
+            developerMode: true,
+            mode: .prompt,
+            promptLength: .medium
+        )
+        let detailed = refiner.refine(
+            text: input,
+            dictionary: [],
+            snippets: [],
+            developerMode: true,
+            mode: .prompt,
+            promptLength: .detailed
+        )
+
+        XCTAssertFalse(short.text.contains("Agent instructions:"))
+        XCTAssertTrue(medium.text.contains("Agent instructions:"))
+        XCTAssertTrue(medium.text.contains("Deliverable:"))
+        XCTAssertTrue(detailed.text.contains("Agent workflow:"))
+        XCTAssertTrue(detailed.text.contains("Quality safeguards:"))
+        XCTAssertGreaterThan(medium.text.split(whereSeparator: \.isWhitespace).count, short.text.split(whereSeparator: \.isWhitespace).count)
+        XCTAssertGreaterThan(detailed.text.split(whereSeparator: \.isWhitespace).count, medium.text.split(whereSeparator: \.isWhitespace).count)
+        XCTAssertTrue(medium.changes.contains { $0.kind == .promptExpansion })
+        XCTAssertTrue(detailed.changes.contains { $0.kind == .promptExpansion })
+    }
+
     func testResamplingProducesExpectedLength() {
         let input = [Float](repeating: 0.5, count: 48_000)
         let output = AVAudioCaptureService.resample(input, from: 48_000, to: 16_000)

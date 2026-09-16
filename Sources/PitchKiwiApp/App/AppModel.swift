@@ -130,7 +130,8 @@ final class AppModel: ObservableObject {
             dictionary: store.dictionary,
             snippets: store.snippets,
             developerMode: store.developerMode,
-            mode: .prompt
+            mode: .prompt,
+            promptLength: store.promptLength
         ).text
         showMainWindow()
     }
@@ -228,7 +229,8 @@ final class AppModel: ObservableObject {
                 dictionary: store.dictionary,
                 snippets: store.snippets,
                 developerMode: store.developerMode,
-                mode: store.dictationMode
+                mode: store.dictationMode,
+                promptLength: store.promptLength
             )
             lastRawTranscript = raw.text
             lastCleanedTranscript = refined.text

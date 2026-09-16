@@ -25,7 +25,7 @@ PitchKiwi is a native, open-source macOS voice tool for developers, vibe coders,
 | | PitchKiwi behavior |
 | --- | --- |
 | **Fast capture** | Hold Fn for push-to-talk, or double-press Fn for hands-free dictation. |
-| **Prompt mode** | Organizes only what you said into Goal, Context, Requirements, and Done when. |
+| **Prompt mode** | Organizes what you said, then optionally expands it with a Medium or Detailed agent-execution brief. |
 | **Smart cleanup** | Removes strong filler, repeated phrases, false starts, and explicit corrections such as “actually no” or “scratch that.” |
 | **Structured speech** | Turns spoken numbered sequences into lists and understands punctuation commands. |
 | **Developer aware** | Handles terms, casing commands, Markdown punctuation, snippets, and a personal dictionary. |
@@ -72,7 +72,12 @@ The bootstrap script downloads checksum-pinned `whisper.cpp` artifacts and the `
 Choose an output mode on Home before speaking:
 
 - **✍️ Dictate** preserves your order and voice while cleaning obvious disfluencies and repetition.
-- **🥝 Prompt** applies the same cleanup, then sorts explicitly stated content into useful prompt sections. Empty sections are omitted; PitchKiwi does not invent requirements or answer the prompt.
+- **🥝 Prompt** applies the same cleanup, sorts explicitly stated content into useful prompt sections, and uses your selected prompt length:
+  - **Short** organizes only what you said.
+  - **Medium** adds compact instructions for execution, assumptions, validation, and the final response.
+  - **Detailed** adds a full agent workflow, scope safeguards, code-aware validation, and deliverable requirements.
+
+Medium and Detailed use fixed, reviewable local templates. They make a short request more actionable without fabricating product facts, files, credentials, APIs, or completed work—and without calling a second AI model.
 
 ### Push to talk
 
@@ -152,7 +157,7 @@ Read the full [security and privacy design](docs/SECURITY.md) and the repository
 | Application | Swift 6, SwiftUI, focused AppKit bridges |
 | Audio | AVFoundation / `AVAudioEngine`, 16 kHz mono PCM |
 | Speech recognition | `whisper.cpp`, local GGML model, Metal acceleration, beam-search decoding |
-| Cleanup | Deterministic Swift pipeline for filler, backtracking, phrase de-duplication, punctuation, lists, and prompt structure |
+| Cleanup | Deterministic Swift pipeline for filler, backtracking, phrase de-duplication, punctuation, lists, prompt structure, and fixed agent briefs |
 | Global controls | AppKit event monitoring with Fn gesture state machine |
 | Text insertion | macOS Accessibility APIs with guarded clipboard fallback |
 | Persistence | Codable JSON, atomic writes, file mode `0600` |

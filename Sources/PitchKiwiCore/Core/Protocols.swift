@@ -18,8 +18,28 @@ public protocol TextRefining: Sendable {
         dictionary: [DictionaryEntry],
         snippets: [Snippet],
         developerMode: Bool,
-        mode: DictationMode
+        mode: DictationMode,
+        promptLength: PromptLength
     ) -> RefinementResult
+}
+
+public extension TextRefining {
+    func refine(
+        text: String,
+        dictionary: [DictionaryEntry],
+        snippets: [Snippet],
+        developerMode: Bool,
+        mode: DictationMode
+    ) -> RefinementResult {
+        refine(
+            text: text,
+            dictionary: dictionary,
+            snippets: snippets,
+            developerMode: developerMode,
+            mode: mode,
+            promptLength: .short
+        )
+    }
 }
 
 public protocol TextInserting: Sendable {

@@ -21,6 +21,7 @@ Pure Swift transformations handle predictable operations:
 - identifier and filename resolution;
 - app-mode formatting.
 - cue-based Prompt mode sectioning into Goal, Context, Requirements, and Done when.
+- user-selected Short, Medium, or Detailed prompt assembly from version-controlled local templates.
 
 This layer is fast, testable, and is the fallback for every failure in Layer B.
 
@@ -92,6 +93,10 @@ a warning.
 - Preserve first-person intent and all concrete references.
 - Do not solve the task or invent acceptance criteria.
 - The current implementation recognizes explicit cues such as “for context,” “make sure,” and “done when.” Content without an explicit non-goal cue remains in Goal rather than being guessed into another section.
+- `Short` stops after cleanup and sectioning.
+- `Medium` appends a compact, fixed execution and validation contract.
+- `Detailed` appends a fixed agent workflow, quality safeguards, conditional code-validation guidance, and final-deliverable contract.
+- Expansion templates may add process instructions, but never product facts, unstated requirements, credentials, filenames, APIs, or claims that work has already happened.
 
 ### Terminal Literal
 
@@ -151,7 +156,7 @@ Reject output when:
 
 - it is not valid UTF-8/JSON or contains unknown top-level fields;
 - `text` is empty for nonempty input;
-- it exceeds `max(1.5 * inputCharacters, inputCharacters + 500)` unless a snippet expansion explains the growth;
+- it exceeds `max(1.5 * inputCharacters, inputCharacters + 500)` unless an explicit snippet or selected fixed Prompt Builder template explains the growth;
 - it loses or mutates a protected span;
 - it changes a number, URL, email, path, filename, identifier, flag, version, negation, or quoted span;
 - it repeats the system prompt, creates commentary, or answers the source;
