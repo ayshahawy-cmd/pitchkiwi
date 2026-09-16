@@ -55,7 +55,11 @@ public final class GlobalShortcutMonitor {
             return
         }
 
-        guard event.type == .flagsChanged, event.keyCode == 63 else { return }
+        // Do not require hardware key code 63. Some external keyboards and
+        // remapped Globe/Fn keys report another key code while still toggling
+        // the public `.function` modifier flag. The state transition is the
+        // stable signal and also filters unrelated flagsChanged events.
+        guard event.type == .flagsChanged else { return }
         let isDown = event.modifierFlags.contains(.function)
         guard isDown != functionKeyIsDown else { return }
         functionKeyIsDown = isDown
@@ -71,7 +75,8 @@ public final class GlobalShortcutMonitor {
         if recognizer.isWaitingForSecondPress {
             pendingRelease = Task { [weak self] in
                 do {
-                    try await Task.sleep(for: .milliseconds(330))
+                let delay = Int(FnKeyGestureRecognizer.doublePressWindow * 1_000) + 20
+                try await Task.sleep(for: .milliseconds(delay))
                 } catch {
                     return
                 }

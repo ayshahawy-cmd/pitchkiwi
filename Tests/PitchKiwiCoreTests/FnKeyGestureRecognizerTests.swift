@@ -17,7 +17,8 @@ final class FnKeyGestureRecognizerTests: XCTestCase {
         XCTAssertEqual(recognizer.keyUp(at: 10.1), [])
         XCTAssertTrue(recognizer.isWaitingForSecondPress)
         XCTAssertEqual(recognizer.timeout(at: 10.3), [])
-        XCTAssertEqual(recognizer.timeout(at: 10.43), [.stop])
+        XCTAssertEqual(recognizer.timeout(at: 10.57), [])
+        XCTAssertEqual(recognizer.timeout(at: 10.59), [.stop])
         XCTAssertFalse(recognizer.isWaitingForSecondPress)
     }
 
@@ -30,6 +31,16 @@ final class FnKeyGestureRecognizerTests: XCTestCase {
         XCTAssertEqual(recognizer.keyUp(at: 10.27), [])
         XCTAssertEqual(recognizer.keyDown(at: 15), [.stop])
         XCTAssertEqual(recognizer.keyUp(at: 15.05), [])
+    }
+
+    func testHumanPacedDoublePressStillLocksHandsFree() {
+        var recognizer = FnKeyGestureRecognizer()
+
+        XCTAssertEqual(recognizer.keyDown(at: 20), [.start])
+        XCTAssertEqual(recognizer.keyUp(at: 20.12), [])
+        XCTAssertEqual(recognizer.keyDown(at: 20.53), [.lockHandsFree])
+        XCTAssertEqual(recognizer.keyUp(at: 20.61), [])
+        XCTAssertEqual(recognizer.keyDown(at: 24), [.stop])
     }
 
     func testResetClearsPendingGesture() {

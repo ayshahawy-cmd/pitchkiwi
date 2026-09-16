@@ -57,10 +57,20 @@ private struct HUDView: View {
                         .font(.system(size: 12))
                     LiveWaveform(level: model.audioLevel)
                     Spacer(minLength: 0)
-                    Image(systemName: model.handsFreeMode ? "lock.fill" : "globe")
-                        .font(.system(size: 10, weight: .semibold))
-                        .foregroundStyle(.secondary)
-                        .accessibilityLabel(model.handsFreeMode ? "Hands-free listening" : "Hold Fn to dictate")
+                    if model.handsFreeMode {
+                        HStack(spacing: 3) {
+                            Image(systemName: "lock.fill")
+                            Text("LOCK")
+                        }
+                        .font(.system(size: 8, weight: .bold, design: .monospaced))
+                        .foregroundStyle(Color(red: 0.58, green: 0.78, blue: 0.12))
+                        .accessibilityLabel("Hands-free capture locked")
+                    } else {
+                        Image(systemName: "globe")
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundStyle(.secondary)
+                            .accessibilityLabel("Hold Fn to capture")
+                    }
                 }
             } else {
                 HStack(spacing: 9) {
@@ -118,25 +128,39 @@ private struct HUDView: View {
 private struct LiveWaveform: View {
     let level: Float
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var recentLevels: [CGFloat] = Array(repeating: 0.06, count: 7)
 
-    private let weights: [CGFloat] = [0.42, 0.72, 1, 0.58, 0.88, 0.66, 0.36]
+    private let weights: [CGFloat] = [0.68, 0.88, 1, 0.76, 0.94, 0.82, 0.64]
 
     var body: some View {
-        HStack(spacing: 3) {
-            ForEach(weights.indices, id: \.self) { index in
-                Capsule(style: .continuous)
-                    .fill(Color(red: 0.58, green: 0.78, blue: 0.12).opacity(0.92))
-                    .frame(width: 3, height: barHeight(at: index))
+        Group {
+            if reduceMotion {
+                Image(systemName: "waveform")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(Color(red: 0.58, green: 0.78, blue: 0.12).opacity(level > 0.03 ? 1 : 0.45))
+                    .frame(width: 48, height: 28)
+            } else {
+                HStack(spacing: 3) {
+                    ForEach(weights.indices, id: \.self) { index in
+                        Capsule(style: .continuous)
+                            .fill(Color(red: 0.58, green: 0.78, blue: 0.12).opacity(0.92))
+                            .frame(width: 3, height: barHeight(at: index))
+                    }
+                }
+                .frame(width: 48, height: 28)
             }
         }
-        .frame(width: 48, height: 28)
-        .animation(reduceMotion ? nil : .easeOut(duration: 0.075), value: level)
+        .onChange(of: level) { _, newLevel in
+            let next = CGFloat(min(1, max(0.04, newLevel)))
+            recentLevels.removeFirst()
+            recentLevels.append(next)
+        }
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.06), value: recentLevels)
         .accessibilityHidden(true)
     }
 
     private func barHeight(at index: Int) -> CGFloat {
-        let responsiveLevel = CGFloat(max(0.06, level))
-        return 3 + (responsiveLevel * 22 * weights[index])
+        3 + (recentLevels[index] * 22 * weights[index])
     }
 }
 

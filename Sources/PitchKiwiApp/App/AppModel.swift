@@ -41,6 +41,10 @@ final class AppModel: ObservableObject {
         case .pressed: self.beginDictation()
         case .released: self.finishDictation()
         case .handsFree:
+            // A quick first Fn release can arrive while the microphone is
+            // still starting and queue a stop. The second tap means the user
+            // explicitly chose hands-free mode, so cancel that pending stop.
+            self.releaseRequested = false
             self.handsFreeMode = true
             self.statusText = "Hands-free listening"
         case .cancel: self.cancelDictation()
@@ -195,10 +199,10 @@ final class AppModel: ObservableObject {
             contextHints = store.contextEnabled
                 ? await inserter.contextHints(around: insertionTarget, limit: 40)
                 : []
+            beginLevelMonitoring()
             try await audio.start()
             microphoneAuthorized = true
             audioIsCapturing = true
-            beginLevelMonitoring()
             if releaseRequested {
                 releaseRequested = false
                 await finishFlow()

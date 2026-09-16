@@ -104,7 +104,7 @@ Needs action       [warning   Couldn't insert] [View] [Copy]
 
 The live waveform is based only on recent RMS amplitude and is discarded. With Reduce Motion, replace waveform animation with a static microphone icon and updating timer.
 
-The shipped compact HUD is a 168 × 42 pt Liquid Glass capsule on macOS 26, with an Ultra Thin Material fallback on older supported releases. Its seven bars are driven by normalized microphone RMS values, not a decorative looping animation.
+The shipped compact HUD is a 168 × 42 pt Liquid Glass capsule on macOS 26, with an Ultra Thin Material fallback on older supported releases. Its seven bars scroll through a smoothed RMS/peak microphone envelope, so quiet and loud speech visibly differ; they are not a decorative looping animation. Hands-free capture displays an explicit `LOCK` state.
 
 ## 6. Key screens
 

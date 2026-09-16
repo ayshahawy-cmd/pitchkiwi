@@ -7,7 +7,10 @@ enum FnGestureCommand: Equatable {
 }
 
 struct FnKeyGestureRecognizer {
-    static let doublePressWindow: TimeInterval = 0.32
+    // Slightly more forgiving than the system double-click interval so the
+    // gesture remains reliable on laptop and external keyboards without
+    // forcing users to drum the Fn key unnaturally fast.
+    static let doublePressWindow: TimeInterval = 0.48
 
     private enum State: Equatable {
         case idle
