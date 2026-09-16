@@ -6,6 +6,8 @@ PitchKiwi should feel like a quiet instrument for thought: warm, precise, and na
 
 Avoid a pixel-for-pixel reproduction of Wispr Flow. Do not use its logo, waveform mark, cream/teal palette, promotional banners, wording, or sidebar composition.
 
+The product must identify its audience immediately. Home, onboarding, navigation, empty states, and examples should refer to coding agents, editors, terminals, repositories, pull requests, project tokens, validation, and implementation work. Avoid generic dictation slogans that could belong to any voice product. Do not copy competitor headlines, feature names, onboarding language, or metaphors.
+
 ## 2. Product personality
 
 - Calm rather than gamified.
@@ -65,16 +67,15 @@ Sidebar sections:
 
 ```text
 PitchKiwi
-  Home
-  Dictionary
-  Snippets
-  Styles
-  Transforms
-  Insights
+  Command Deck
+  Project Dictionary
+  Voice Macros
+  Output Rules
+  Prompt Lab
+  Build Stats
 
-System
-  Settings
-  Help
+Runtime
+  Runtime & Privacy
 ```
 
 No billing, referrals, team sharing, notifications, or account avatar. A compact privacy status belongs at the sidebar bottom:
@@ -109,7 +110,9 @@ The shipped compact HUD is a 168 × 42 pt Liquid Glass capsule on macOS 26, with
 
 ### Home
 
-- Primary readiness card: shortcut, microphone, model, Accessibility status.
+- Original developer-first headline plus a visible tool strip for coding agents, editors, terminals, and pull requests.
+- Primary readiness cards: audio input, local speech engine, and editor bridge.
+- Dictation / Agent Prompt mode control, with prompt-depth selection visible in Agent Prompt mode.
 - Try-it field for safe in-app dictation.
 - History appears only when enabled; an empty state explains the privacy default.
 - Small local privacy summary and clear data action.

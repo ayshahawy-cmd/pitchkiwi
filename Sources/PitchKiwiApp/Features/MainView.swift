@@ -13,6 +13,18 @@ private enum Destination: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
+    var title: String {
+        switch self {
+        case .home: "Command Deck"
+        case .dictionary: "Project Dictionary"
+        case .snippets: "Voice Macros"
+        case .styles: "Output Rules"
+        case .transforms: "Prompt Lab"
+        case .insights: "Build Stats"
+        case .settings: "Runtime & Privacy"
+        }
+    }
+
     var icon: String {
         switch self {
         case .home: "waveform"
@@ -40,14 +52,14 @@ struct MainView: View {
                     .padding(.vertical, 18)
 
                 List(selection: $selection) {
-                    Section("Workspace") {
+                    Section("Build tools") {
                         ForEach(Destination.allCases.filter { $0 != .settings }) { destination in
-                            Label(destination.rawValue, systemImage: destination.icon)
+                            Label(destination.title, systemImage: destination.icon)
                                 .tag(destination)
                         }
                     }
-                    Section("System") {
-                        Label(Destination.settings.rawValue, systemImage: Destination.settings.icon)
+                    Section("Runtime") {
+                        Label(Destination.settings.title, systemImage: Destination.settings.icon)
                             .tag(Destination.settings)
                     }
                 }
@@ -158,15 +170,15 @@ private struct OnboardingView: View {
 
     private var welcomeStep: some View {
         OnboardingPage(
-            icon: "leaf.fill",
-            eyebrow: "WELCOME TO PITCHKIWI",
-            title: "Meet your prompt kiwi. 🥝",
-            message: "Rambling in, useful words out. Whisper and Prompt mode run on this Mac, audio is discarded after transcription, and your voice is never uploaded."
+            icon: "terminal.fill",
+            eyebrow: "VOICE INPUT FOR BUILDERS",
+            title: "Talk to your tools like a teammate.",
+            message: "PitchKiwi turns spoken implementation ideas into clean text for Codex, Claude Code, Cursor, terminals, issue trackers, and any editor—entirely on this Mac."
         ) {
             HStack(spacing: 12) {
-                PromisePill(icon: "lock.fill", text: "No account")
-                PromisePill(icon: "icloud.slash.fill", text: "No cloud")
-                PromisePill(icon: "waveform.badge.minus", text: "No saved audio")
+                PromisePill(icon: "cpu", text: "Local speech engine")
+                PromisePill(icon: "curlybraces.square", text: "Agent-ready prompts")
+                PromisePill(icon: "terminal", text: "Terminal-safe")
             }
         }
     }
@@ -174,9 +186,9 @@ private struct OnboardingView: View {
     private var controlsStep: some View {
         OnboardingPage(
             icon: "keyboard",
-            eyebrow: "ONE KEY, TWO MODES",
-            title: "Hold, speak, release. Easy. 🥝",
-            message: "Use the Fn/Globe key from any normal text field. PitchKiwi places the finished transcript at the cursor without pressing Return or submitting anything."
+            eyebrow: "ONE KEY, ANY EDITOR",
+            title: "Capture the thought without leaving the code.",
+            message: "Use Fn from a source file, agent chat, terminal, pull request, or issue. PitchKiwi returns text to the same cursor and never presses Return or submits a command."
         ) {
             HStack(spacing: 14) {
                 GestureCard(keys: ["fn"], title: "Push to talk", detail: "Hold while speaking · release to insert")
@@ -188,9 +200,9 @@ private struct OnboardingView: View {
     private var permissionsStep: some View {
         OnboardingPage(
             icon: "hand.raised.fill",
-            eyebrow: "MAC PERMISSIONS",
-            title: "Two permissions. Nothing more.",
-            message: "Microphone lets PitchKiwi hear you. Accessibility lets it detect Fn and insert text into the app you were already using."
+            eyebrow: "LOCAL RUNTIME ACCESS",
+            title: "Two macOS bridges. No account.",
+            message: "Microphone captures only an active dictation. Accessibility observes Fn and writes the result back into your current development tool."
         ) {
             VStack(spacing: 10) {
                 PermissionRow(
@@ -217,15 +229,15 @@ private struct OnboardingView: View {
     private var readyStep: some View {
         OnboardingPage(
             icon: "checkmark",
-            eyebrow: "YOU'RE READY",
-            title: "Pitch your first prompt.",
-            message: "Choose Prompt mode, open your coding tool or AI chat, hold Fn, and ramble naturally. PitchKiwi will remove verbal clutter and organize only what you actually said."
+            eyebrow: "READY TO BUILD",
+            title: "Open your agent. Hold Fn. Build.",
+            message: "Choose Agent Prompt, select Short, Medium, or Detailed, then speak naturally. PitchKiwi cleans the request and adds the level of execution guidance you chose."
         ) {
             VStack(alignment: .leading, spacing: 10) {
                 Text("Try saying")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.secondary)
-                Text("“Build a small Swift function that validates an email address.”")
+                Text("“In AuthService, add token refresh, keep secrets in .env, update the tests, and do not change the public API.”")
                     .font(.system(size: 16, weight: .medium, design: .rounded))
                     .frame(maxWidth: .infinity, alignment: .leading)
                 Label("The first transcription may be slower while the local model warms up.", systemImage: "bolt.fill")
@@ -370,7 +382,7 @@ private struct BrandHeader: View {
             }
             VStack(alignment: .leading, spacing: 0) {
                 Text("PitchKiwi").font(.headline)
-                Text("LOCAL PROMPT VOICE")
+                Text("VOICE INPUT FOR BUILDERS")
                     .font(.system(size: 8, weight: .bold, design: .monospaced))
                     .foregroundStyle(.secondary)
                     .tracking(1.2)
@@ -385,7 +397,7 @@ private struct PrivacyBadge: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Label("LOCAL MODE", systemImage: "lock.fill")
+            Label("OFFLINE RUNTIME", systemImage: "lock.fill")
                 .font(.system(size: 10, weight: .bold, design: .monospaced))
                 .foregroundStyle(KiwiPalette.accent)
             Text("History \(store.retention == .never ? "off" : "on") · Context \(store.contextEnabled ? "on" : "off")")
@@ -414,17 +426,19 @@ private struct HomeView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 22) {
                 PageHeader(
-                    eyebrow: "🥝 RAMBLE IN. CLEAR PROMPT OUT.",
-                    title: "Turn a messy thought into something your agent can act on.",
+                    eyebrow: "VOICE → AGENT INPUT",
+                    title: "From half-formed thought to build-ready instruction.",
                     subtitle: store.dictationMode == .prompt
-                        ? "Prompt mode cleans and structures what you said, then can add a reusable agent brief at the length you choose—without a second AI model."
-                        : "Dictate mode preserves your order and voice while removing obvious filler, repeated words, and repeated phrases."
+                        ? "Agent Prompt turns spoken intent into a structured implementation brief for coding agents, with the execution depth you choose."
+                        : "Dictation keeps your technical wording intact while removing false starts, filler, and accidental repetition."
                 )
 
+                DeveloperToolStrip()
+
                 HStack(spacing: 14) {
-                    StatusCard(title: "Microphone", value: model.microphoneAuthorized ? "Ready" : "Needs access", icon: "mic.fill", ready: model.microphoneAuthorized)
-                    StatusCard(title: "Whisper model", value: model.modelURL?.lastPathComponent ?? "Import model", icon: "cpu", ready: model.modelReady)
-                    StatusCard(title: "Insertion", value: model.accessibilityAuthorized ? "Ready" : "Needs access", icon: "cursorarrow.click.2", ready: model.accessibilityAuthorized)
+                    StatusCard(title: "Audio input", value: model.microphoneAuthorized ? "Ready" : "Needs access", icon: "mic.fill", ready: model.microphoneAuthorized)
+                    StatusCard(title: "Local speech engine", value: model.modelURL?.lastPathComponent ?? "Import model", icon: "cpu", ready: model.modelReady)
+                    StatusCard(title: "Editor bridge", value: model.accessibilityAuthorized ? "Ready" : "Needs access", icon: "cursorarrow.click.2", ready: model.accessibilityAuthorized)
                 }
 
                 if !model.accessibilityAuthorized {
@@ -438,8 +452,8 @@ private struct HomeView: View {
 
                 HStack(spacing: 16) {
                     Picker("Output mode", selection: $store.dictationMode) {
-                        Text("✍️ Dictate").tag(DictationMode.dictate)
-                        Text("🥝 Prompt").tag(DictationMode.prompt)
+                        Text("✍️ Dictation").tag(DictationMode.dictate)
+                        Text("⌘ Agent Prompt").tag(DictationMode.prompt)
                     }
                     .pickerStyle(.segmented)
                     .labelsHidden()
@@ -449,7 +463,7 @@ private struct HomeView: View {
                         model.toggleDictation()
                     } label: {
                         Label(
-                            model.phase == .listening ? "Stop listening" : (store.dictationMode == .prompt ? "Start prompt" : "Start dictation"),
+                            model.phase == .listening ? "Stop capture" : (store.dictationMode == .prompt ? "Record agent prompt" : "Start dictation"),
                             systemImage: model.phase == .listening ? "stop.fill" : "mic.fill"
                         )
                             .font(.headline)
@@ -459,12 +473,12 @@ private struct HomeView: View {
                     .buttonStyle(.borderedProminent)
                     .tint(KiwiPalette.accent)
 
-                    KeyCap(text: "fn", detail: "hold · double-press hands-free")
+                    KeyCap(text: "fn", detail: "global capture key")
                 }
 
                 if store.dictationMode == .prompt {
                     HStack(spacing: 14) {
-                        Label("Prompt length", systemImage: "text.line.last.and.arrowtriangle.forward")
+                        Label("Agent prompt depth", systemImage: "text.line.last.and.arrowtriangle.forward")
                             .font(.headline)
                         Picker("Prompt length", selection: $store.promptLength) {
                             ForEach(PromptLength.allCases) { length in
@@ -486,13 +500,13 @@ private struct HomeView: View {
                 GroupBox {
                     VStack(alignment: .leading, spacing: 12) {
                         HStack {
-                            Label("Last transcript", systemImage: "text.bubble")
+                            Label("Latest build input", systemImage: "text.bubble")
                                 .font(.headline)
                             Spacer()
                             Text(model.statusText).font(.caption).foregroundStyle(.secondary)
                         }
                         if model.lastTranscript.isEmpty {
-                            Text("Your most recent result stays in memory until you quit. History is off by default.")
+                            Text("Your latest dictation or agent prompt appears here. It stays in memory until you quit; history is off by default.")
                                 .foregroundStyle(.secondary)
                                 .frame(maxWidth: .infinity, minHeight: 90, alignment: .topLeading)
                         } else {
@@ -559,6 +573,35 @@ private struct KeyCap: View {
     }
 }
 
+private struct DeveloperToolStrip: View {
+    private let tools: [(String, String)] = [
+        ("terminal", "Codex"),
+        ("chevron.left.forwardslash.chevron.right", "Claude Code"),
+        ("cursorarrow.rays", "Cursor"),
+        ("apple.terminal", "Terminal"),
+        ("arrow.triangle.pull", "Pull requests"),
+    ]
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Text("BUILT FOR")
+                .font(.system(size: 9, weight: .bold, design: .monospaced))
+                .foregroundStyle(.secondary)
+                .tracking(1.1)
+            ForEach(tools, id: \.1) { icon, title in
+                Label(title, systemImage: icon)
+                    .font(.system(size: 11, weight: .semibold, design: .rounded))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 7)
+                    .background(.primary.opacity(0.055), in: Capsule())
+            }
+            Spacer(minLength: 0)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Built for Codex, Claude Code, Cursor, terminals, and pull requests")
+    }
+}
+
 private struct DictionaryView: View {
     @ObservedObject var store: LocalStore
     @State private var spoken = ""
@@ -566,7 +609,7 @@ private struct DictionaryView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            PageHeader(eyebrow: "PERSONAL VOCABULARY", title: "Dictionary", subtitle: "Teach exact spellings and map common mishearings. Everything stays on this Mac.")
+            PageHeader(eyebrow: "PROJECT-SPECIFIC TOKENS", title: "Project Dictionary", subtitle: "Lock in framework names, identifiers, repositories, environment variables, and internal terminology. Everything stays on this Mac.")
             HStack {
                 TextField("What you say — e.g. super base", text: $spoken)
                 Image(systemName: "arrow.right").foregroundStyle(.secondary)
@@ -613,7 +656,7 @@ private struct SnippetsView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            PageHeader(eyebrow: "VOICE SHORTCUTS", title: "Snippets", subtitle: "Say a whole trigger phrase to expand text you use repeatedly.")
+            PageHeader(eyebrow: "REUSABLE DEV BLOCKS", title: "Voice Macros", subtitle: "Speak one trigger to insert a PR checklist, debugging template, commit format, or prompt block you use repeatedly.")
             VStack(spacing: 10) {
                 HStack {
                     TextField("Name", text: $name)
@@ -623,7 +666,7 @@ private struct SnippetsView: View {
                     .lineLimit(2...5)
                 HStack {
                     Spacer()
-                    Button("Add snippet") {
+                    Button("Add voice macro") {
                         store.addSnippet(name: name, trigger: trigger, expansion: expansion)
                         name = ""; trigger = ""; expansion = ""
                     }
@@ -661,21 +704,21 @@ private struct StylesView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                PageHeader(eyebrow: "HOW YOUR WORDS LAND", title: "Styles", subtitle: "Both modes are deterministic, inspectable, and local—no second AI model required.")
+                PageHeader(eyebrow: "COMPILER FOR YOUR SPEECH", title: "Output Rules", subtitle: "Choose how spoken developer language becomes code-aware text and agent instructions. Every rule runs locally and is inspectable.")
 
-                SettingCard(icon: "chevron.left.forwardslash.chevron.right", title: "Code & prompts", description: "Preserve Markdown and translate spoken developer notation such as dot env, dash dash force, and casing commands.") {
-                    Toggle("Developer formatting", isOn: $store.developerMode)
+                SettingCard(icon: "chevron.left.forwardslash.chevron.right", title: "Developer syntax", description: "Preserve Markdown and compile spoken notation such as dot env, dash dash force, camel case, snake case, and fenced code blocks.") {
+                    Toggle("Compile syntax", isOn: $store.developerMode)
                 }
 
                 SettingCard(icon: "terminal", title: "Terminal safety", description: "PitchKiwi inserts text only. It never synthesizes Return or executes the command.") {
                     Label("Always on", systemImage: "checkmark.shield.fill").foregroundStyle(.green)
                 }
 
-                SettingCard(icon: "text.alignleft", title: "Clean dictation", description: "Remove verbal warm-ups, filler, repeated words, and repeated phrases while preserving uncertainty and intent.") {
+                SettingCard(icon: "text.alignleft", title: "Intent cleanup", description: "Remove verbal warm-ups, false starts, filler, and repetition while preserving uncertainty, negation, identifiers, and scope.") {
                     Text("Always on").foregroundStyle(.secondary)
                 }
 
-                SettingCard(icon: "list.bullet.rectangle", title: "Prompt length", description: "Short preserves only your content. Medium adds a compact execution brief. Detailed adds workflow, safeguards, validation, and deliverable instructions. The added text is a fixed local template—not generated facts.") {
+                SettingCard(icon: "list.bullet.rectangle", title: "Agent prompt depth", description: "Short compiles only your request. Medium adds an execution contract. Detailed adds repository inspection, scope safeguards, validation, and delivery requirements. Templates are fixed and local.") {
                     Picker("Prompt length", selection: $store.promptLength) {
                         ForEach(PromptLength.allCases) { length in Text(length.title).tag(length) }
                     }
@@ -694,18 +737,18 @@ private struct TransformsView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            PageHeader(eyebrow: "LOCAL TRANSFORMS", title: "Shape the thought, not the meaning.", subtitle: "Prompt Builder organizes your request and can append a fixed agent brief. It never answers the prompt or invents product facts.")
+            PageHeader(eyebrow: "PROMPT WORKBENCH", title: "Compile speech into agent input.", subtitle: "Rework the latest capture without leaving the Mac. PitchKiwi structures the request but never performs the task or invents repository facts.")
 
             HStack(spacing: 14) {
-                TransformCard(icon: "wand.and.stars", title: "Polish", description: "Run conservative cleanup again and open the result in the scratchpad.") {
+                TransformCard(icon: "wand.and.stars", title: "Re-run cleanup", description: "Apply conservative intent cleanup again and open the result in the local workbench.") {
                     model.putLastInScratchpad()
                 }
-                TransformCard(icon: "curlybraces.square", title: "Prompt Builder", description: "Turn the last result into a (model.store.promptLength.title.lowercased()) agent prompt—without sending it to another model.") {
+                TransformCard(icon: "curlybraces.square", title: "Compile agent prompt", description: "Turn the last result into a \(model.store.promptLength.title.lowercased())-depth coding-agent prompt without another model.") {
                     model.makePromptFromLast()
                 }
             }
 
-            GroupBox("Scratchpad — local only") {
+            GroupBox("Prompt workbench — local only") {
                 TextEditor(text: $model.scratchpad)
                     .font(.system(.body, design: .monospaced))
                     .scrollContentBackground(.hidden)
@@ -729,7 +772,7 @@ private struct TransformCard: View {
             Text(title).font(.headline)
             Text(description).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             Spacer()
-            Button("Use last transcript", action: action)
+            Button("Use latest capture", action: action)
         }
         .padding(18)
         .frame(maxWidth: .infinity, minHeight: 170, alignment: .leading)
@@ -743,16 +786,16 @@ private struct InsightsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 22) {
-                PageHeader(eyebrow: "ON-DEVICE COUNTERS", title: "Insights", subtitle: "Only totals and timings are stored. No transcript content is needed for these metrics.")
+                PageHeader(eyebrow: "LOCAL BUILD TELEMETRY", title: "Build Stats", subtitle: "See how often voice became agent input or developer syntax. Counters contain no app names, repository names, or transcript content.")
                 HStack(spacing: 14) {
                     MetricCard(value: "\(store.metrics.prompts)", label: "PROMPTS SHAPED", icon: "list.bullet.rectangle")
                     MetricCard(value: "\(store.metrics.developerFixes)", label: "DEV TERMS FIXED", icon: "chevron.left.forwardslash.chevron.right")
-                    MetricCard(value: "\(store.metrics.dictations)", label: "KIWI SESSIONS", icon: "leaf.fill")
+                    MetricCard(value: "\(store.metrics.dictations)", label: "VOICE CAPTURES", icon: "waveform")
                 }
                 GroupBox {
                     VStack(alignment: .leading, spacing: 14) {
-                        Text("Privacy-respecting by design").font(.headline)
-                        Text("PitchKiwi records aggregate counts, not app titles, document names, audio, or dictated text when History is off.")
+                        Text("Metrics without repository surveillance").font(.headline)
+                        Text("PitchKiwi records aggregate counts—not editor names, repository paths, document titles, audio, or dictated text when History is off.")
                             .foregroundStyle(.secondary)
                         Button("Reset metrics", role: .destructive) { store.resetMetrics() }
                     }
@@ -796,9 +839,9 @@ private struct SettingsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                PageHeader(eyebrow: "CONTROL THE BOUNDARY", title: "Settings", subtitle: "Microphone → this Mac → your cursor. No account and no cloud transcription.")
+                PageHeader(eyebrow: "LOCAL RUNTIME CONFIG", title: "Runtime & Privacy", subtitle: "Configure the capture key, local model, editor bridge, retention, and bounded context. No account and no cloud transcription.")
 
-                SettingCard(icon: "keyboard", title: "Fn key dictation", description: "Hold fn and release to insert. Double-press fn to keep listening hands-free; press fn once more to stop.") {
+                SettingCard(icon: "keyboard", title: "Global capture key", description: "Hold fn from an editor or agent chat and release to insert. Double-press for hands-free capture; press once more to stop.") {
                     Text("fn")
                         .font(.system(size: 13, weight: .bold, design: .monospaced))
                         .padding(.horizontal, 12)
@@ -806,11 +849,11 @@ private struct SettingsView: View {
                         .background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
                 }
 
-                SettingCard(icon: "cpu", title: "Whisper model", description: model.modelURL.map { "\($0.lastPathComponent) · base.en is fast; larger compatible .en models improve recognition but use more memory and time." } ?? "No local model found") {
+                SettingCard(icon: "cpu", title: "Local speech model", description: model.modelURL.map { "\($0.lastPathComponent) · base.en is fast; larger compatible English models improve technical-word recognition but use more memory and time." } ?? "No local model found") {
                     Button("Import .bin…") { model.importModel() }
                 }
 
-                SettingCard(icon: "cursorarrow.click.2", title: "Accessibility", description: model.accessibilityAuthorized ? "Granted. PitchKiwi can insert at your cursor." : "Required to insert into other apps. Click Grant access, enable PitchKiwi, then return here.") {
+                SettingCard(icon: "cursorarrow.click.2", title: "Editor bridge", description: model.accessibilityAuthorized ? "Granted. PitchKiwi can return text to the active cursor." : "Required for the global Fn key and cross-app insertion. Click Grant access, enable PitchKiwi, then return here.") {
                     Button(model.accessibilityAuthorized ? "Granted" : "Grant access") { model.requestAccessibility() }
                         .disabled(model.accessibilityAuthorized)
                 }
