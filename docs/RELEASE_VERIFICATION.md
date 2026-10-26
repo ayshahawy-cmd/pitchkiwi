@@ -22,6 +22,9 @@ Date: **October 25, 2026 (America/Toronto)**. App version **0.8.3**, build **13*
 | Clean `./scripts/package-release.sh` | Built the arm64 app and ZIP with bundled English model and legal files |
 | `check-release.sh` | Bundle signature, arm64 executable, model hash, Info.plist, privacy manifest, icon, and legal-file checks passed |
 | Dynamic linking | App references `@rpath/whisper.framework/Versions/Current/whisper`, with the framework bundled in Contents/Frameworks |
+| Extracted distribution ZIP | Fresh extraction passed the same bundle checks; ZIP SHA-256 passed |
+| GitHub CI | [Build, tests, packaging, and artifact upload passed](https://github.com/ayshahawy-cmd/pitchkiwi/actions/runs/40265656364) on the release-preparation source |
+| Website CI and deployment | [Website CI passed](https://github.com/ayshahawy-cmd/pitchkiwi_website/actions/runs/40265776573); Vercel production deployment succeeded and /api/download returned the intended 302 |
 | Real-model inference | A synthetic macOS `say` fixture transcribed as “Please add a Settings button and update the tests.” |
 | Secret scan | Gitleaks 8.30.1 scanned all 14 pre-release app commits and 13 website commits; no leaks found |
 | Website JavaScript syntax | Passed |
