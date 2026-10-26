@@ -1,5 +1,7 @@
 # Build plan
 
+> **Document status:** This design document includes future goals and acceptance criteria, not a statement that every item ships. The current beta uses JSON storage, deterministic cleanup, a fixed Fn shortcut, and local model import. Read [USER_GUIDE.md](USER_GUIDE.md) for shipped behavior and limitations, and [RELEASE_VERIFICATION.md](RELEASE_VERIFICATION.md) for actual test evidence.
+
 ## Working method
 
 Build vertical slices with acceptance gates. Each phase ends with a compilable app, automated tests, a manual demonstration, and updated documentation. Do not hide incomplete privacy or permission behavior behind mock UI.

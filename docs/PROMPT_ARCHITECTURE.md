@@ -1,5 +1,7 @@
 # Prompt and refinement architecture
 
+> **Document status:** This design document includes future goals and acceptance criteria, not a statement that every item ships. The current beta uses JSON storage, deterministic cleanup, a fixed Fn shortcut, and local model import. Read [USER_GUIDE.md](USER_GUIDE.md) for shipped behavior and limitations, and [RELEASE_VERIFICATION.md](RELEASE_VERIFICATION.md) for actual test evidence.
+
 ## 1. Goal
 
 Speech cleanup must make dictated text easier to use without changing what the speaker meant. It must never answer a prompt, invent a requirement, silently weaken uncertainty, or modify code tokens. The default path is deterministic and requires no generative model.

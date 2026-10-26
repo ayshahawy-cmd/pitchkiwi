@@ -5,7 +5,7 @@ ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT_DIR"
 
 [[ -d .vendor/whisper.xcframework ]] || "$ROOT_DIR/scripts/bootstrap.sh" --framework-only
-swift build -c release --product PitchKiwi
+swift build -c release --arch arm64 --product PitchKiwi
 
 APP_DIR="$ROOT_DIR/.build/PitchKiwi.app"
 EXECUTABLE_DIR="$APP_DIR/Contents/MacOS"
@@ -17,6 +17,9 @@ mkdir -p "$EXECUTABLE_DIR" "$FRAMEWORKS_DIR" "$RESOURCES_DIR/Models"
 cp "$ROOT_DIR/.build/release/PitchKiwi" "$EXECUTABLE_DIR/PitchKiwi"
 cp "$ROOT_DIR/Packaging/Info.plist" "$APP_DIR/Contents/Info.plist"
 cp -R "$ROOT_DIR/.vendor/whisper.xcframework/macos-arm64_x86_64/whisper.framework" "$FRAMEWORKS_DIR/whisper.framework"
+mkdir -p "$RESOURCES_DIR/Legal"
+cp "$ROOT_DIR/LICENSE" "$ROOT_DIR/THIRD_PARTY_NOTICES.md" "$RESOURCES_DIR/Legal/"
+cp -R "$ROOT_DIR/Legal" "$RESOURCES_DIR/Legal/ThirdParty"
 
 ICON_WORK_DIR="$(mktemp -d -t pitchkiwi-icon)"
 ICONSET_DIR="$ICON_WORK_DIR/PitchKiwi.iconset"

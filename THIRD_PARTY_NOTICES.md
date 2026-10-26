@@ -1,6 +1,6 @@
 # Third-party notices
 
-PitchKiwi ships or interoperates with the following open-source components. Keep this file with redistributed builds.
+PitchKiwi ships the following open-source components. Keep this file and the complete notices in `Legal/` with redistributed builds. The app builder copies these into `PitchKiwi.app/Contents/Resources/Legal/` before signing the bundle.
 
 ## whisper.cpp
 
@@ -8,6 +8,8 @@ PitchKiwi ships or interoperates with the following open-source components. Keep
 - Bundled artifact: `whisper.xcframework`, release build b5130 / v1.9.4 source revision `927cfce34f31707e17f2bff35c349632fb9e2c3a`
 - License: MIT
 - Copyright © 2023-2026 The ggml authors
+- Complete upstream notice: [Legal/whisper.cpp-LICENSE.txt](Legal/whisper.cpp-LICENSE.txt)
+- Framework archive SHA-256: `033a43b0174e8cf9b366f72e4a428cdcf126f93ad1c87d3fa119a96bed6f231a`
 
 ## Whisper model and architecture
 
@@ -15,6 +17,13 @@ PitchKiwi ships or interoperates with the following open-source components. Keep
 - Bundled default model: `ggml-base.en.bin`, converted for whisper.cpp
 - License: MIT
 - Copyright © 2022 OpenAI
+- Model source: [ggerganov/whisper.cpp on Hugging Face](https://huggingface.co/ggerganov/whisper.cpp)
+- Complete upstream notice: [Legal/whisper-LICENSE.txt](Legal/whisper-LICENSE.txt)
+- Default model SHA-256: `a03779c86df3323075f5e796cb2ce5029f00ec8869eee3fdfb897afe36c6d002`
+
+## Platform frameworks and assets
+
+SwiftUI, AppKit, AVFoundation, ApplicationServices, CryptoKit, and system fonts are provided by Apple under its platform terms; they are not relicensed by PitchKiwi. The source package has no downloaded Swift package dependencies. PitchKiwi's original SVG artwork and repository documentation are covered by the repository MIT license. Third-party product names in examples do not imply endorsement or transfer rights to their branding. Imported models remain subject to their own licenses.
 
 ## MIT license text
 

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability privately
+    url: https://github.com/ayshahawy-cmd/pitchkiwi/security/advisories/new
+    about: Do not disclose security issues or personal data in public bug reports.
+  - name: Installation and troubleshooting
+    url: https://github.com/ayshahawy-cmd/pitchkiwi/blob/main/docs/TROUBLESHOOTING.md
+    about: Check permissions, Fn shortcuts, model setup, and macOS installation help.

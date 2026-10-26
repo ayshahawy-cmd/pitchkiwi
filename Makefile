@@ -1,4 +1,4 @@
-.PHONY: bootstrap build test app release smoke clean
+.PHONY: bootstrap build test app release check-release smoke clean
 
 bootstrap:
 	./scripts/bootstrap.sh
@@ -14,6 +14,9 @@ app:
 
 release:
 	./scripts/package-release.sh
+
+check-release:
+	./scripts/check-release.sh
 
 smoke:
 	@test -n "$(AUDIO)" || (echo "Usage: make smoke AUDIO=/absolute/path/to/audio" && exit 2)

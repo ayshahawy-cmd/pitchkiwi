@@ -17,6 +17,10 @@
 
 PitchKiwi is a native, open-source macOS voice tool for developers, vibe coders, and people who think out loud. It runs Whisper locally, removes verbal clutter with deterministic rules, and can turn a rambling request into a structured prompt without sending it to another AI model.
 
+**[Download for Mac](https://github.com/ayshahawy-cmd/pitchkiwi/releases)** · **[User guide](docs/USER_GUIDE.md)** · **[Troubleshooting](docs/TROUBLESHOOTING.md)** · **[Build from source](docs/DEVELOPMENT.md)** · **[Website source](https://github.com/ayshahawy-cmd/pitchkiwi_website)**
+
+The current release is a community beta for **Apple Silicon, macOS 14+**, with an English model included. Downloads do not require an email address, account, subscription, or API key. The source and original assets use the MIT license; [third-party notices](THIRD_PARTY_NOTICES.md) accompany the app. Read [known limitations](docs/USER_GUIDE.md#known-limitations) before relying on a beta build.
+
 > [!NOTE]
 > PitchKiwi is an original project inspired by the interaction pattern of modern dictation tools. It does not contain Wispr Flow source code, private APIs, branding, copy, or visual assets.
 
@@ -39,13 +43,13 @@ PitchKiwi is a native, open-source macOS voice tool for developers, vibe coders,
 
 ### From GitHub Releases
 
-1. Open the repository's [latest release](https://github.com/ayshahawy-cmd/pitchkiwi/releases/latest).
+1. Open the repository's [latest release](https://github.com/ayshahawy-cmd/pitchkiwi/releases).
 2. Download `PitchKiwi-macOS.zip` and unzip it.
 3. Move `PitchKiwi.app` into your **Applications** folder.
-4. On the first launch, right-click PitchKiwi and choose **Open**.
+4. Try opening the app. If macOS blocks it, use **System Settings → Privacy & Security → Open Anyway** after verifying the download, then confirm **Open**. On older macOS versions, Control-click → **Open** may also be available.
 5. Follow the four-screen onboarding guide to grant Microphone and Accessibility access.
 
-Pre-1.0 community builds are ad-hoc signed. macOS may say it cannot verify the developer; right-clicking and choosing **Open** uses Apple's normal one-app approval flow. Do not disable Gatekeeper. A future public release should use Developer ID signing and notarization.
+Community beta builds are **ad-hoc signed and not notarized**. The signature verifies bundle integrity; it does not establish an Apple-verified developer identity. Follow [Apple's per-app approval instructions](https://support.apple.com/en-ca/102445). See [installation and checksum verification](docs/USER_GUIDE.md#download-and-verify). The automatically generated GitHub “Source code” archives are for developers; download `PitchKiwi-macOS.zip` to install the app.
 
 ### Build it yourself
 
@@ -54,7 +58,7 @@ Requirements:
 - macOS 14 or newer
 - Apple Silicon Mac
 - Xcode 16 or newer, or matching Command Line Tools
-- About 500 MB free for the framework, model, and build output
+- At least 3 GB free recommended for downloaded dependencies and build caches (the default model alone is about 148 MB)
 
 ```bash
 git clone https://github.com/ayshahawy-cmd/pitchkiwi.git
@@ -65,11 +69,11 @@ swift test
 open ".build/PitchKiwi.app"
 ```
 
-The bootstrap script downloads checksum-pinned `whisper.cpp` artifacts and the `ggml-base.en` model. The model and generated app stay in ignored local directories and are not committed to Git.
+The bootstrap script downloads checksum-pinned `whisper.cpp` artifacts and the `ggml-base.en` model. The model and generated app stay in ignored local directories and are not committed to Git. The build supports Swift 6 / Xcode 16 or newer; the current release's actual validation environment is recorded in [release verification](docs/RELEASE_VERIFICATION.md). See [development setup](docs/DEVELOPMENT.md) for Xcode troubleshooting, offline builds, model provenance, and all build targets.
 
 ## How to use it
 
-Choose an output mode on Home before speaking:
+Choose an output mode on **Command Deck** (Home in older builds) before speaking:
 
 - **✍️ Dictate** preserves your order and voice while cleaning obvious disfluencies and repetition.
 - **🥝 Prompt** applies the same cleanup, sorts explicitly stated content into useful prompt sections, and uses your selected prompt length:
@@ -225,4 +229,17 @@ docs/                     product, architecture, security, and UX specs
 
 Issues and focused pull requests are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md), preserve the privacy and non-submission invariants, and never commit recordings, real transcripts, model weights, signing secrets, or screenshots containing personal data.
 
-PitchKiwi is available under the [MIT License](LICENSE). The name is provisional; complete a trademark and repository-name check before a broad release.
+PitchKiwi is maintained by [Ahmed Yasser](https://github.com/ayshahawy-cmd) and contributors and is available under the [MIT License](LICENSE). You may use, modify, redistribute, and sell copies subject to retaining the license notices. The license does not imply an endorsement of forks or grant rights to third-party trademarks. See the [code of conduct](CODE_OF_CONDUCT.md) and [private vulnerability reporting policy](SECURITY.md).
+
+## Documentation index
+
+| Document | What you will find |
+| --- | --- |
+| [User guide](docs/USER_GUIDE.md) | Download, checksum, installation, permissions, dictation, modes, dictionary, macros, privacy, updating, and uninstalling |
+| [Troubleshooting](docs/TROUBLESHOOTING.md) | Gatekeeper, missing permissions, Fn conflicts, missing models, slow or inaccurate recognition, insertion, and reporting bugs |
+| [Development](docs/DEVELOPMENT.md) | Clean checkout, pinned dependencies, local builds, tests, smoke CLI, and source structure |
+| [Release process](docs/DISTRIBUTION.md) | Versioning, packaging, signing status, publication, and verification |
+| [Release verification](docs/RELEASE_VERIFICATION.md) | Checks actually run for the current release, environment, and testing limits |
+| [Contributing](CONTRIBUTING.md) | Development workflow, pull requests, fixtures, and licensing contributions |
+
+The original product, architecture, prompt, security, design, and build-plan documents also contain future goals. Their status notes distinguish design intent from the features available in this beta. The user guide describes the current implementation.

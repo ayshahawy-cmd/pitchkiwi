@@ -4,6 +4,30 @@ All notable changes will be documented here. This project follows Keep a Changel
 
 ## Unreleased
 
+No changes recorded yet.
+
+## 0.8.3-beta.1 — 2026-10-25
+
+### Added
+
+- Public MIT-licensed app and website sources, detailed user/developer guides, troubleshooting, and release verification notes.
+- Complete upstream license notices embedded in the application bundle.
+- Release validation for model checksum, arm64 executable, privacy metadata, signature, icon, and legal files.
+- CI packaging and downloadable community-build artifacts.
+
+### Fixed
+
+- Release packaging now ensures the default model is present, even on a fresh checkout.
+- Default model caches are rechecked against the pinned SHA-256.
+- Installation instructions cover current macOS per-app approval, and guides distinguish shipped features from design goals.
+- Issue templates use the current PitchKiwi name.
+
+### Distribution
+
+- Community beta remains ad-hoc signed and unnotarized; macOS 14+, Apple Silicon, English-first.
+
+## Earlier development (before the first published release)
+
 ### Added
 
 - Product, architecture, prompt, security, design, and phased build specifications.

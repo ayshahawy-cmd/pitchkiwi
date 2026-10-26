@@ -1,5 +1,7 @@
 # Product specification
 
+> **Document status:** This design document includes future goals and acceptance criteria, not a statement that every item ships. The current beta uses JSON storage, deterministic cleanup, a fixed Fn shortcut, and local model import. Read [USER_GUIDE.md](USER_GUIDE.md) for shipped behavior and limitations, and [RELEASE_VERIFICATION.md](RELEASE_VERIFICATION.md) for actual test evidence.
+
 ## 1. Product definition
 
 PitchKiwi is a local-first macOS dictation utility optimized for long prompts and developer language. It converts speech to text on-device, applies bounded local cleanup, and inserts the result into the active application.

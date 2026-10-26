@@ -4,6 +4,10 @@ Thanks for helping build a private, local dictation tool for macOS.
 
 Before opening a code change, read `AGENTS.md` and the documents in `docs/`. Privacy, non-submission, clipboard preservation, and original design are project invariants.
 
+Use the [development guide](docs/DEVELOPMENT.md) for a complete clean-checkout setup. Install dependencies with `make bootstrap`, then run `swift build` and `swift test`. Create a branch in your fork and submit a pull request to `main`. Builds require no secrets or paid Apple account.
+
+By contributing, you agree that your contribution may be distributed under this repository's [MIT License](LICENSE). Submit only work you have the right to license. No contributor license agreement is currently required. Follow the [code of conduct](CODE_OF_CONDUCT.md).
+
 ## Before a pull request
 
 - Open or reference an issue for user-visible or architectural changes.

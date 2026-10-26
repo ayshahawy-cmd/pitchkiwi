@@ -14,5 +14,7 @@ Do not post another person's voice, transcript, private code, credentials, conta
 
 Maintainers may edit or remove content, close contributions, or temporarily or permanently restrict participation when behavior threatens people or the project. Enforcement decisions should be documented privately and applied consistently.
 
-Before public beta, the maintainers must publish a private contact address for conduct reports. Until then, avoid disclosing sensitive details in a public issue.
+For a private conduct concern, contact [Ahmed Yasser (@AhmedYsrrr)](https://x.com/AhmedYsrrr). If a private message is unavailable, request a private contact channel without posting the incident or personal details publicly. Security vulnerabilities have a separate [private reporting channel](SECURITY.md).
+
+This policy applies to repository issues, pull requests, reviews, and other project spaces. Maintainers will consider the impact, preserve reporter privacy where possible, and may warn, remove content, temporarily restrict participation, or ban a participant. Reports concerning a maintainer should identify that conflict when requesting a private channel. There is no independent moderation team or guaranteed response time.
 

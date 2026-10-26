@@ -1,5 +1,7 @@
 # Architecture
 
+> **Document status:** This design document includes future goals and acceptance criteria, not a statement that every item ships. The current beta uses JSON storage, deterministic cleanup, a fixed Fn shortcut, and local model import. Read [USER_GUIDE.md](USER_GUIDE.md) for shipped behavior and limitations, and [RELEASE_VERIFICATION.md](RELEASE_VERIFICATION.md) for actual test evidence.
+
 ## 1. Decision summary
 
 PitchKiwi should be a native menu-bar macOS application with a conventional settings window and a borderless floating HUD. Swift owns the orchestration and privacy boundary. `whisper.cpp` is embedded as a pinned native library for local speech recognition. Optional local rewriting is isolated behind a second engine adapter and is never part of the required transcription path.

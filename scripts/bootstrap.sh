@@ -9,6 +9,10 @@ FRAMEWORK_SHA="033a43b0174e8cf9b366f72e4a428cdcf126f93ad1c87d3fa119a96bed6f231a"
 MODEL_URL="https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en.bin"
 MODEL_SHA="a03779c86df3323075f5e796cb2ce5029f00ec8869eee3fdfb897afe36c6d002"
 FRAMEWORK_ONLY="${1:-}"
+if [[ $# -gt 1 || ( -n "$FRAMEWORK_ONLY" && "$FRAMEWORK_ONLY" != "--framework-only" ) ]]; then
+  echo "Usage: $0 [--framework-only]" >&2
+  exit 2
+fi
 TEMP_PATHS=()
 
 cleanup() {
@@ -37,6 +41,10 @@ if [[ "$FRAMEWORK_ONLY" != "--framework-only" && ! -f "$MODEL_DIR/ggml-base.en.b
   echo "$MODEL_SHA  $MODEL_TEMP" | shasum -a 256 -c -
   mv "$MODEL_TEMP" "$MODEL_DIR/ggml-base.en.bin"
   chmod 600 "$MODEL_DIR/ggml-base.en.bin"
+fi
+
+if [[ "$FRAMEWORK_ONLY" != "--framework-only" ]]; then
+  echo "$MODEL_SHA  $MODEL_DIR/ggml-base.en.bin" | shasum -a 256 -c -
 fi
 
 echo "PitchKiwi dependencies are ready."

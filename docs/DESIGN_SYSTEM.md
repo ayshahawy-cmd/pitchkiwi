@@ -1,5 +1,7 @@
 # Design system
 
+> **Document status:** This design document includes future goals and acceptance criteria, not a statement that every item ships. The current beta uses JSON storage, deterministic cleanup, a fixed Fn shortcut, and local model import. Read [USER_GUIDE.md](USER_GUIDE.md) for shipped behavior and limitations, and [RELEASE_VERIFICATION.md](RELEASE_VERIFICATION.md) for actual test evidence.
+
 ## 1. Visual intent
 
 PitchKiwi should feel like a quiet instrument for thought: warm, precise, and native to the Mac. The supplied references demonstrate useful hierarchy—airy panels, restrained navigation, large readable metrics, and a compact recording surface—but the implementation must use original colors, layout, copy, iconography, and motion.

@@ -3,6 +3,7 @@ name: CI
 on:
   push:
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -11,10 +12,20 @@ jobs:
   build-and-test:
     runs-on: macos-15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - name: Bootstrap pinned native framework
         run: ./scripts/bootstrap.sh --framework-only
       - name: Build
         run: swift build
       - name: Test
         run: swift test
+      - name: Build and verify distributable app
+        run: ./scripts/package-release.sh
+      - name: Upload community build
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: PitchKiwi-macOS-${{ github.sha }}
+          path: |
+            .build/PitchKiwi-macOS.zip
+            .build/PitchKiwi-macOS.zip.sha256
+          retention-days: 14
