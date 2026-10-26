@@ -1,4 +1,36 @@
-# Release verification: v0.8.3-beta.1
+# Release verification: v0.8.4-beta.1
+
+Date: **October 26, 2026 (America/Toronto)**. App version **0.8.4**, build **14**. This update adds official signed/notarized distribution; speech processing code is unchanged from the preceding beta.
+
+## Official Mac downloads
+
+- **PitchKiwi-macOS.dmg**: Developer ID signed, notarized, stapled, compressed/read-only disk image. Includes PitchKiwi.app, an Applications shortcut, and a text installation guide.
+- **PitchKiwi-macOS.zip**: alternative archive containing the same stapled app.
+- Each format has its own portable SHA-256 checksum file.
+- Requirements remain Apple Silicon (M1+), macOS 14+, with the local English model included. Intel support is not claimed.
+
+## Checks completed
+
+| Check | Result |
+| --- | --- |
+| Release build | Passed with Developer ID signing, secure timestamp, hardened runtime, and microphone audio-input entitlement |
+| App submission to Apple | **Accepted**, submission `c8985e4a-3e2d-4cf9-a0ba-c1155c22a4cd` |
+| DMG submission to Apple | **Accepted**, submission `bac638b0-280e-4c66-94ac-c4212bdd1049` |
+| Stapled tickets | `stapler validate` passed for the app and DMG |
+| Gatekeeper | App and disk image both accepted, source **Notarized Developer ID** |
+| DMG integrity | `hdiutil verify` passed |
+| Installation layout | Mounted read-only; complete app, Applications symlink, and installation guide present; detached cleanly |
+| Embedded app | Signature, arm64 executable, Info.plist, English model digest, privacy metadata, icon, and license checks passed on the mounted app |
+| Swift suite | 40 tests passed, 0 failures |
+| Website | JavaScript checks, 10 API tests, static build/local links passed; primary route targets DMG and pricing-style cards removed |
+
+Signing uses a maintainer certificate already present in the local Keychain and a saved notarization profile. No certificate, password, private key, or profile credential is included in source, CI, or release files. Ordinary contributor/CI builds default to ad-hoc signing and are **not** described as notarized. See [DISTRIBUTION.md](DISTRIBUTION.md) for the opt-in release process.
+
+Notarization confirms Apple's acceptance of submitted software; it is not a claim that every app behavior or hardware configuration has been tested. Full live microphone, cross-app clipboard/insertion, clean-user onboarding, VoiceOver, and each older supported macOS version remain outside this packaging verification. The earlier unit and real-model evidence is preserved below. Check the release's CI result and published file checksums for remote publication evidence.
+
+---
+
+## Earlier release verification: v0.8.3-beta.1
 
 Date: **October 25, 2026 (America/Toronto)**. App version **0.8.3**, build **13**. The release tag identifies the source revision. These are the checks performed for this community beta, not a claim of a complete security audit.
 

@@ -12,23 +12,23 @@ PitchKiwi converts speech into text on your Mac and inserts it into the text fie
 ## Download and verify
 
 1. Visit [GitHub Releases](https://github.com/ayshahawy-cmd/pitchkiwi/releases).
-2. Download **`PitchKiwi-macOS.zip`** and **`PitchKiwi-macOS.zip.sha256`** from the same release. GitHub's “Source code” files are not the app.
-3. With both files in Downloads, optionally verify the archive in Terminal:
+2. Download **`PitchKiwi-macOS.dmg`** and **`PitchKiwi-macOS.dmg.sha256`** from the same release. GitHub's “Source code” files are not the app.
+3. With both files in Downloads, optionally verify the disk image in Terminal:
 
    ```bash
    cd ~/Downloads
-   shasum -a 256 -c PitchKiwi-macOS.zip.sha256
+   shasum -a 256 -c PitchKiwi-macOS.dmg.sha256
    ```
 
-   Expect `PitchKiwi-macOS.zip: OK`. A mismatch means the files do not belong together or the archive changed; download both again before opening. A matching checksum confirms consistency with the published checksum, not an independent security review.
+   Expect `PitchKiwi-macOS.dmg: OK`. A mismatch means the files do not belong together or the archive changed; download both again before opening. A matching checksum confirms consistency with the published checksum, not an independent security review.
 
-Downloads are public. No email signup or payment is required.
+Downloads are public. No email signup or payment is required. GitHub also hosts `PitchKiwi-macOS.zip` and its matching checksum if you prefer an archive.
 
 ## Installation and first launch
 
-1. Unzip the archive and move `PitchKiwi.app` into Applications.
+1. Open `PitchKiwi-macOS.dmg`, drag `PitchKiwi.app` onto its Applications shortcut, then eject the disk image. A ZIP archive is available as an alternative.
 2. Open the app from Applications.
-3. This community beta is ad-hoc signed and **not notarized**. If blocked, first check the release and checksum, then follow [Apple's instructions](https://support.apple.com/en-ca/102445): after attempting to launch, open **System Settings → Privacy & Security**, choose **Open Anyway**, and confirm. Older systems may also offer Control-click → Open. Do not use a global Gatekeeper override.
+3. The official 0.8.4 beta app and DMG are **Developer ID signed, notarized by Apple, and stapled**. Confirm the ordinary macOS first-launch prompt. If macOS reports damage or malware, stop and re-download the official file rather than overriding the warning. Older releases and locally built/CI community apps can be unnotarized; their status is disclosed separately.
 4. Complete the four-step onboarding. Enable Microphone for speech capture and Accessibility for the Fn key and text insertion. Return to PitchKiwi so the permission indicators refresh.
 5. Open TextEdit, make a new plain-text document, and place the cursor in it before your first dictation.
 
@@ -97,19 +97,19 @@ The app also uses macOS preferences for onboarding and the selected model filena
 
 ## Models and offline use
 
-Release ZIPs include `ggml-base.en.bin`; you can dictate offline after installation. The native app does not download models automatically. Source builds fetch dependencies through the bootstrap script before packaging. Import a compatible English `.bin` model under Runtime & Privacy if needed. Imports check the extension, size, and GGML header; arbitrary imported files are **not** authenticated against a trusted digest catalog. Obtain them from a trusted source and verify the provider's checksum yourself. The bundled default is checksum-pinned during packaging.
+Official DMG and ZIP downloads include `ggml-base.en.bin`; you can dictate offline after installation. The native app does not download models automatically. Source builds fetch dependencies through the bootstrap script before packaging. Import a compatible English `.bin` model under Runtime & Privacy if needed. Imports check the extension, size, and GGML header; arbitrary imported files are **not** authenticated against a trusted digest catalog. Obtain them from a trusted source and verify the provider's checksum yourself. The bundled default is checksum-pinned during packaging.
 
 The decoder currently uses English. Importing a multilingual model does not add a language selector or guarantee non-English behavior. Larger models require more RAM and disk and can be slower. To return to the default, import the trusted `ggml-base.en.bin` model again.
 
 ## Updates and removal
 
-Updates are manual: quit PitchKiwi, download the new release ZIP, verify it, and replace the copy in Applications. Reopen and check permissions. There is no automatic updater, launch-at-login control, or App Store distribution in this beta.
+Updates are manual: quit PitchKiwi, download the new release DMG or ZIP, verify it, and replace the copy in Applications. Reopen and check permissions. There is no automatic updater, launch-at-login control, or App Store distribution in this beta.
 
 To uninstall, quit the app and move it to Trash. This does **not** remove Application Support data. To remove that data too, use Finder → Go → Go to Folder, enter `~/Library/Application Support/PitchKiwi`, and remove the folder after making any backup you want. This removes imported models, dictionary, macros, history, and counters. Remove PitchKiwi's Microphone and Accessibility grants in System Settings if desired. Deleting files is not a guarantee of forensic erasure or removal from backups.
 
 ## Known limitations
 
-- The release is an ad-hoc signed, unnotarized community beta. Minimum macOS support is declared in the bundle; validation on every supported OS version has not been completed.
+- The official 0.8.4 beta is signed and notarized. Source/CI builds default to ad-hoc signatures. Minimum macOS support is declared in the bundle; validation on every supported OS version has not been completed.
 - Recognition starts after capture ends; there are no live partial transcripts.
 - Capture buffers retain up to five minutes of audio. Stop earlier: capture beyond that point is not included, and there is no automatic five-minute stop or advance warning yet.
 - Fn is fixed. Some hardware does not expose it, and macOS key assignments can conflict.

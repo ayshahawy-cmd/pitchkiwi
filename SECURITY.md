@@ -12,7 +12,7 @@ Include the version or commit, macOS version, affected component, expected impac
 | `main` | Active development; fixes land here first |
 | Older beta versions | No backports promised |
 
-This is a volunteer-maintained beta. There is no guaranteed response time or security audit claim. Maintainers should acknowledge a report, investigate with synthetic data, prepare a fix, and coordinate disclosure with the reporter. Releases are currently ad-hoc signed and **not notarized**.
+This is a volunteer-maintained beta. There is no guaranteed response time or security audit claim. Maintainers should acknowledge a report, investigate with synthetic data, prepare a fix, and coordinate disclosure with the reporter. The official 0.8.4 beta app and DMG are Developer ID signed and notarized. Older releases and source/CI community builds can remain ad-hoc signed; check each release’s stated status.
 
 The current threat model and privacy requirements are in [docs/SECURITY.md](docs/SECURITY.md).
 

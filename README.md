@@ -19,7 +19,7 @@ PitchKiwi is a native, open-source macOS voice tool for developers, vibe coders,
 
 **[Download for Mac](https://github.com/ayshahawy-cmd/pitchkiwi/releases)** · **[User guide](docs/USER_GUIDE.md)** · **[Troubleshooting](docs/TROUBLESHOOTING.md)** · **[Build from source](docs/DEVELOPMENT.md)** · **[Website source](https://github.com/ayshahawy-cmd/pitchkiwi_website)**
 
-The current release is a community beta for **Apple Silicon, macOS 14+**, with an English model included. Downloads do not require an email address, account, subscription, or API key. The source and original assets use the MIT license; [third-party notices](THIRD_PARTY_NOTICES.md) accompany the app. Read [known limitations](docs/USER_GUIDE.md#known-limitations) before relying on a beta build.
+The current official release is a Developer ID signed and notarized beta for **Apple Silicon, macOS 14+**, with an English model included. Downloads do not require an email address, account, subscription, or API key. The source and original assets use the MIT license; [third-party notices](THIRD_PARTY_NOTICES.md) accompany the app. Read [known limitations](docs/USER_GUIDE.md#known-limitations) before relying on a beta build.
 
 > [!NOTE]
 > PitchKiwi is an original project inspired by the interaction pattern of modern dictation tools. It does not contain Wispr Flow source code, private APIs, branding, copy, or visual assets.
@@ -44,12 +44,12 @@ The current release is a community beta for **Apple Silicon, macOS 14+**, with a
 ### From GitHub Releases
 
 1. Open the repository's [latest release](https://github.com/ayshahawy-cmd/pitchkiwi/releases).
-2. Download `PitchKiwi-macOS.zip` and unzip it.
-3. Move `PitchKiwi.app` into your **Applications** folder.
-4. Try opening the app. If macOS blocks it, use **System Settings → Privacy & Security → Open Anyway** after verifying the download, then confirm **Open**. On older macOS versions, Control-click → **Open** may also be available.
+2. Download `PitchKiwi-macOS.dmg` and its `.sha256` checksum. A ZIP is also available.
+3. Open the DMG, drag `PitchKiwi.app` onto its **Applications** shortcut, then eject the disk image.
+4. Open PitchKiwi from Applications and confirm the normal macOS first-launch prompt.
 5. Follow the four-screen onboarding guide to grant Microphone and Accessibility access.
 
-Community beta builds are **ad-hoc signed and not notarized**. The signature verifies bundle integrity; it does not establish an Apple-verified developer identity. Follow [Apple's per-app approval instructions](https://support.apple.com/en-ca/102445). See [installation and checksum verification](docs/USER_GUIDE.md#download-and-verify). The automatically generated GitHub “Source code” archives are for developers; download `PitchKiwi-macOS.zip` to install the app.
+The official **0.8.4 beta DMG and app are Developer ID signed, notarized by Apple, and stapled** so their tickets travel with the download. Ordinary source/CI builds remain ad-hoc signed unless a maintainer explicitly configures signing and notarization. See [installation and checksum verification](docs/USER_GUIDE.md#download-and-verify). The GitHub “Source code” archives are for developers; use the DMG for installation.
 
 ### Build it yourself
 
@@ -201,7 +201,7 @@ make bootstrap   # download and verify the framework + default model
 make build       # debug build
 make test        # run unit tests
 make app         # produce .build/PitchKiwi.app
-make release     # produce the app ZIP and SHA-256 checksum
+make release     # produce verified DMG + ZIP and their SHA-256 checksums
 ```
 
 Test the actual local model against an audio file:
@@ -210,7 +210,7 @@ Test the actual local model against an audio file:
 swift run pitchkiwi-smoke .models/ggml-base.en.bin /path/to/speech.wav
 ```
 
-Release maintainers can run `make release`, then upload both `.build/PitchKiwi-macOS.zip` and `.build/PitchKiwi-macOS.zip.sha256` to a GitHub Release.
+Release maintainers can run `make release` to build a DMG, a ZIP, and their SHA-256 files. Developer ID signing/notarization is opt-in through local environment settings; see the [release process](docs/DISTRIBUTION.md). Credentials and certificates never belong in Git.
 
 ## Repository map
 

@@ -4,9 +4,9 @@ Start with the latest [community beta](https://github.com/ayshahawy-cmd/pitchkiw
 
 ## macOS blocks the app
 
-This beta is ad-hoc signed and not notarized. Download the ZIP and checksum from the same GitHub Release and verify them. After trying to open the app, go to System Settings → Privacy & Security → Open Anyway, then confirm. Older systems may support Control-click → Open. Follow [Apple's instructions](https://support.apple.com/en-ca/102445). If macOS says a file is damaged, modified, or contains malware, stop and download a fresh copy. Do not disable Gatekeeper globally or remove quarantine recursively.
+The official 0.8.4 beta app and DMG are Developer ID signed and notarized. Download `PitchKiwi-macOS.dmg` and its checksum from the same GitHub Release, open the image, drag the app to Applications, eject, and launch from Applications. Confirm the normal first-launch prompt. If macOS reports that the file is damaged or contains malware, stop and download a fresh official copy; do not disable Gatekeeper globally or remove quarantine recursively.
 
-“Bad CPU type in executable” indicates an unsupported architecture. This release is for Apple Silicon. Download `PitchKiwi-macOS.zip`; the GitHub source archives cannot be opened as an app.
+Older releases and locally built community versions can be unnotarized. Follow their documented status and [Apple's instructions](https://support.apple.com/en-ca/102445) only after confirming their source. “Bad CPU type in executable” indicates an unsupported architecture: this release is for Apple Silicon. GitHub source archives are not installable apps.
 
 ## Fn does nothing or opens Emoji / Apple Dictation
 
@@ -37,7 +37,7 @@ Check Microphone permission and the input device/level under System Settings →
 
 ## “No local model found” or model import fails
 
-Official app ZIPs include the default model. A developer build made without bootstrap may omit it. Run `./scripts/bootstrap.sh` and `./scripts/build-app.sh` from the checkout, or import a trusted compatible `.bin` in Runtime & Privacy.
+Official app DMGs and ZIPs include the default model. A developer build made without bootstrap may omit it. Run `./scripts/bootstrap.sh` and `./scripts/build-app.sh` from the checkout, or import a trusted compatible `.bin` in Runtime & Privacy.
 
 Imports require a `.bin` extension, a GGML header, and a size greater than 1 MB and no larger than 4.5 GB. A file passing these checks can still be incompatible with the native parser. A `.gguf`, Core ML bundle, HTML download page, Git LFS pointer, or compressed archive is not the expected model. Re-download the model and verify its provider's SHA-256. Arbitrary imports are not automatically authenticated.
 

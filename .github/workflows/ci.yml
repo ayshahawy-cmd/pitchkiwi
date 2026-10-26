@@ -28,4 +28,6 @@ jobs:
           path: |
             .build/PitchKiwi-macOS.zip
             .build/PitchKiwi-macOS.zip.sha256
+            .build/PitchKiwi-macOS.dmg
+            .build/PitchKiwi-macOS.dmg.sha256
           retention-days: 14

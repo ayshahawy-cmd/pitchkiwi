@@ -6,6 +6,20 @@ All notable changes will be documented here. This project follows Keep a Changel
 
 No changes recorded yet.
 
+## 0.8.4-beta.1 — 2026-10-26
+
+### Added
+
+- Downloadable Mac DMG with the complete app, bundled English model, Applications shortcut, install guide, and SHA-256 checksum.
+- Opt-in Developer ID signing with hardened runtime and microphone entitlement, Apple notarization, stapled tickets, and Gatekeeper verification for official releases.
+- Automated DMG integrity/mount/install-layout checks and DMG artifacts in CI.
+
+### Changed
+
+- Official Mac downloads now use the DMG by default; a notarized ZIP remains available.
+- Website presents a free download and optional GitHub contributions, with no pricing page or plan cards.
+- Updated installation, security, and release instructions for the signed/notarized beta.
+
 ## 0.8.3-beta.1 — 2026-10-25
 
 ### Added

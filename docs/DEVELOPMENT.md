@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-Use an Apple Silicon Mac with macOS 14+, Swift 6, Git, and Xcode 16+ or compatible Command Line Tools. Full Xcode is recommended when SDK selection fails. Release scripts use standard macOS tools: `zsh`, `curl`, `shasum`, `unzip`, `ditto`, `sips`, `iconutil`, `plutil`, `lipo`, and `codesign`. No Node.js, Python runtime, paid developer account, API key, or backend is required to build the app.
+Use an Apple Silicon Mac with macOS 14+, Swift 6, Git, and Xcode 16+ or compatible Command Line Tools. Full Xcode is recommended when SDK selection fails. Release scripts use standard macOS tools: `zsh`, `curl`, `shasum`, `unzip`, `ditto`, `sips`, `iconutil`, `plutil`, `lipo`, `hdiutil`, and `codesign`. No Node.js, Python runtime, paid developer account, API key, or backend is required to build the app.
 
 Allow at least 3 GB for dependencies and caches. Internet is required for initial pinned downloads; subsequent builds and dictation can run offline. The [website](https://github.com/ayshahawy-cmd/pitchkiwi_website) is a separate Node.js project.
 
@@ -51,7 +51,9 @@ For an offline build, transfer the verified framework and model into `.vendor/wh
 | `make build` | Debug package build |
 | `make test` | XCTest suite with synthetic fixtures |
 | `make app` | Ad-hoc signed `.build/PitchKiwi.app`; includes a model if present |
-| `make release` | Bootstraps the model, builds/verifies a complete app, generates ZIP and checksum |
+| `make release` | Bootstraps the model, builds/verifies a complete app, generates DMG + ZIP and checksums |
+| `make dmg` | Creates a DMG from the already built app, with an Applications shortcut and install guide |
+| `make check-dmg` | Verifies and mounts the DMG read-only, checks its app and install layout, then detaches |
 | `make check-release` | Checks signature, arm64, model digest, privacy manifest, icon, and notices |
 | `make smoke AUDIO=/absolute/path/to/speech.wav` | Real-model CLI transcription |
 | `make clean` | Clears package build products, keeping downloaded caches |
@@ -95,4 +97,4 @@ Read `AGENTS.md` before implementation. Historical design documents include futu
 
 ## Contributions
 
-Fork on GitHub, clone your fork, add this repository as `upstream`, create a focused branch, and run relevant checks. Open a PR against `main` with behavior, evidence, and data/permission changes. See [contributing](../CONTRIBUTING.md). Contributor builds need no signing secret or paid Apple account.
+Fork on GitHub, clone your fork, add this repository as `upstream`, create a focused branch, and run relevant checks. Open a PR against `main` with behavior, evidence, and data/permission changes. See [contributing](../CONTRIBUTING.md). Contributor builds need no signing secret or paid Apple account. Official downloads are separately signed/notarized with a maintainer identity and saved local Keychain profile; see [distribution](DISTRIBUTION.md).

@@ -1,4 +1,4 @@
-.PHONY: bootstrap build test app release check-release smoke clean
+.PHONY: bootstrap build test app release dmg check-release check-dmg smoke clean
 
 bootstrap:
 	./scripts/bootstrap.sh
@@ -14,6 +14,12 @@ app:
 
 release:
 	./scripts/package-release.sh
+
+dmg:
+	./scripts/package-dmg.sh
+
+check-dmg:
+	./scripts/check-dmg.sh
 
 check-release:
 	./scripts/check-release.sh

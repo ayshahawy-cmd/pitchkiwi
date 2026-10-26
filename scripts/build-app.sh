@@ -41,7 +41,14 @@ if [[ -f "$ROOT_DIR/.models/ggml-base.en.bin" ]]; then
   cp "$ROOT_DIR/.models/ggml-base.en.bin" "$RESOURCES_DIR/Models/ggml-base.en.bin"
 fi
 
-codesign --force --sign - --timestamp=none "$FRAMEWORKS_DIR/whisper.framework"
-codesign --force --sign - --timestamp=none --deep "$APP_DIR"
+SIGNING_IDENTITY="${PITCHKIWI_SIGNING_IDENTITY:--}"
+if [[ "$SIGNING_IDENTITY" == "-" ]]; then
+  codesign --force --sign - --timestamp=none "$FRAMEWORKS_DIR/whisper.framework"
+  codesign --force --sign - --timestamp=none "$APP_DIR"
+else
+  codesign --force --sign "$SIGNING_IDENTITY" --timestamp --options runtime "$FRAMEWORKS_DIR/whisper.framework"
+  codesign --force --sign "$SIGNING_IDENTITY" --timestamp --options runtime \
+    --entitlements "$ROOT_DIR/Packaging/Entitlements.plist" "$APP_DIR"
+fi
 
 echo "$APP_DIR"
